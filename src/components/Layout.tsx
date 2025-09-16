@@ -1,0 +1,125 @@
+"use client";
+
+import { ReactNode } from "react";
+import Sidebar, { SidebarItem, adminSidebarItems, librarianSidebarItems, memberSidebarItems } from "./Sidebar";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
+
+interface LayoutProps {
+    children: ReactNode;
+    sidebarItems?: SidebarItem[];
+    title?: string;
+    username?: string;
+    userRole?: string;
+    showSidebar?: boolean;
+    showFooter?: boolean;
+    className?: string;
+}
+
+export default function Layout({
+    children,
+    sidebarItems = [],
+    title = "ระบบจัดการห้องสมุด",
+    username = "Admin",
+    userRole = "ผู้ดูแลระบบ",
+    showSidebar = true,
+    showFooter = true,
+    className = "",
+}: LayoutProps) {
+    const { isCollapsed, toggleCollapse } = useSidebarCollapse(false);
+
+    return (
+        <div className={`min-h-screen bg-gray-100 flex flex-col ${className}`}>
+            {/* Navbar - Always at top */}
+            <Navbar
+                username={username}
+                userRole={userRole}
+                title={title}
+                onToggleSidebar={showSidebar ? toggleCollapse : undefined}
+            />
+
+            {/* Main Layout Container */}
+            <div className="flex flex-1 overflow-hidden">
+                {/* Sidebar - Conditionally rendered */}
+                {showSidebar && sidebarItems.length > 0 && (
+                    <Sidebar
+                        items={sidebarItems}
+                        isCollapsed={isCollapsed}
+                    />
+                )}
+
+                {/* Content Area */}
+                <div className="flex-1 flex flex-col">
+                    {/* Main Content */}
+                    <main className="flex-1 overflow-y-auto p-6">
+                        {children}
+                    </main>
+
+                    {/* Footer - Always at bottom */}
+                    {showFooter && <Footer />}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Pre-configured layout variants for different user roles
+interface DashboardLayoutProps extends Omit<LayoutProps, 'sidebarItems'> {
+    userType: 'admin' | 'librarian' | 'member';
+}
+
+export function DashboardLayout({ userType, ...props }: DashboardLayoutProps) {
+    // Import sidebar items based on user type
+    const getSidebarItems = () => {
+        switch (userType) {
+            case 'admin':
+                return adminSidebarItems;
+            case 'librarian':
+                return librarianSidebarItems;
+            case 'member':
+                return memberSidebarItems;
+            default:
+                return [];
+        }
+    };
+
+    return (
+        <Layout
+            sidebarItems={getSidebarItems()}
+            userRole={
+                userType === 'admin' ? 'ผู้ดูแลระบบ' :
+                    userType === 'librarian' ? 'บรรณารักษ์' : 'สมาชิก'
+            }
+            {...props}
+        />
+    );
+}
+
+// Simple layout without sidebar for public pages
+export function PublicLayout({ children, showFooter = true, ...props }: Omit<LayoutProps, 'sidebarItems' | 'showSidebar'>) {
+    return (
+        <Layout
+            sidebarItems={[]}
+            showSidebar={false}
+            showFooter={showFooter}
+            {...props}
+        >
+            {children}
+        </Layout>
+    );
+}
+
+// Full-width layout without sidebar and footer
+export function FullscreenLayout({ children, ...props }: Omit<LayoutProps, 'sidebarItems' | 'showSidebar' | 'showFooter'>) {
+    return (
+        <Layout
+            sidebarItems={[]}
+            showSidebar={false}
+            showFooter={false}
+            {...props}
+        >
+            {children}
+        </Layout>
+    );
+}
