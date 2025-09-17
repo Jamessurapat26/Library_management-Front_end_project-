@@ -1,5 +1,5 @@
 import { Member } from "@/mock/members";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 
 interface MemberTableProps {
     members: Member[];
@@ -79,8 +79,8 @@ export default function MemberTable({ members, onToggleStatus, onDeleteMember, c
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {members.map((member) => (
-                            <>
-                                <tr key={member.id} className="hover:bg-gray-50">
+                            <Fragment key={member.id}>
+                                <tr className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div>
                                             <p className="text-sm font-medium text-gray-900">{member.name}</p>
@@ -128,8 +128,8 @@ export default function MemberTable({ members, onToggleStatus, onDeleteMember, c
                                         <button
                                             onClick={() => onToggleStatus(member.id)}
                                             className={`px-3 py-1 rounded text-xs font-medium transition-colors ${member.status === "active"
-                                                    ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                                    : "bg-green-100 text-green-700 hover:bg-green-200"
+                                                ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                                : "bg-green-100 text-green-700 hover:bg-green-200"
                                                 }`}
                                         >
                                             {member.status === "active" ? "ปิดใช้งาน" : "เปิดใช้งาน"}
@@ -196,7 +196,7 @@ export default function MemberTable({ members, onToggleStatus, onDeleteMember, c
                                         </td>
                                     </tr>
                                 )}
-                            </>
+                            </Fragment>
                         ))}
                     </tbody>
                 </table>
