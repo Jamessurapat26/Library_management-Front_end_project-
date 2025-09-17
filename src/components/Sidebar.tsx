@@ -265,7 +265,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   {
     id: "transactions",
     label: "การยืม-คืน",
-    href: "/admin/transactions",
+    href: "/transactions",
     badge: "5", // Static badge for UI demo
     icon: (
       <svg
@@ -286,7 +286,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   {
     id: "reports",
     label: "รายงาน",
-    href: "/admin/reports",
+    href: "/reports",
     icon: (
       <svg
         className="w-5 h-5"
