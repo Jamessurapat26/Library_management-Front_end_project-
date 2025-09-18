@@ -8,7 +8,9 @@ import {
     MemberStats,
     MemberTable,
     AddMemberDialog,
-    type Member
+    EditMemberDialog,
+    type Member,
+    type EditMemberForm
 } from "./components";
 import { mockMembers } from "@/mock";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,6 +30,8 @@ export default function MemberManagementPage() {
     const { canCreateUser } = useUserCreationValidation();
     const [members, setMembers] = useState<Member[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [selectedMember, setSelectedMember] = useState<Member | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "librarian" | "member">("all");
     const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
@@ -37,6 +41,8 @@ export default function MemberManagementPage() {
         phone: "",
         role: "member"
     });
+    const [successMessage, setSuccessMessage] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
 
     // Load mock data
     useEffect(() => {
@@ -133,6 +139,86 @@ export default function MemberManagementPage() {
         }
     };
 
+    // Handle opening edit dialog with selected member
+    const handleEditMember = (member: Member) => {
+        setSelectedMember(member);
+        setShowEditDialog(true);
+        // Clear any existing messages
+        setSuccessMessage("");
+        setErrorMessage("");
+    };
+
+    // Handle updating member data
+    const handleUpdateMember = async (updatedMember: EditMemberForm): Promise<{ success: boolean; message?: string }> => {
+        try {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Check for duplicate email (excluding current member)
+            const duplicateEmail = members.find(m =>
+                m.id !== updatedMember.id &&
+                m.email.toLowerCase() === updatedMember.email.toLowerCase()
+            );
+            if (duplicateEmail) {
+                return {
+                    success: false,
+                    message: 'อีเมลนี้มีการใช้งานแล้วโดยสมาชิกคนอื่น'
+                };
+            }
+
+            // Check for duplicate phone (excluding current member)
+            const duplicatePhone = members.find(m =>
+                m.id !== updatedMember.id &&
+                m.phone === updatedMember.phone
+            );
+            if (duplicatePhone) {
+                return {
+                    success: false,
+                    message: 'เบอร์โทรศัพท์นี้มีการใช้งานแล้วโดยสมาชิกคนอื่น'
+                };
+            }
+
+            // Update the member in the members array
+            const updatedMembers = members.map(member =>
+                member.id === updatedMember.id
+                    ? {
+                        ...member,
+                        name: updatedMember.name,
+                        email: updatedMember.email,
+                        phone: updatedMember.phone,
+                        // Keep other fields unchanged as they are read-only in edit mode
+                    }
+                    : member
+            );
+
+            setMembers(updatedMembers);
+            setShowEditDialog(false);
+            setSelectedMember(null);
+            setSuccessMessage("อัพเดทข้อมูลสมาชิกเรียบร้อยแล้ว");
+            setErrorMessage("");
+
+            // Clear success message after 5 seconds
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 5000);
+
+            return { success: true };
+        } catch (error) {
+            console.error("Error updating member:", error);
+            return {
+                success: false,
+                message: 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์'
+            };
+        }
+    };
+
+    // Handle closing edit dialog
+    const handleCloseEditDialog = () => {
+        setShowEditDialog(false);
+        setSelectedMember(null);
+        // Don't clear success/error messages here as they should persist after dialog closes
+    };
+
     const handleClearFilters = () => {
         setSearchTerm("");
         setRoleFilter("all");
@@ -163,6 +249,47 @@ export default function MemberManagementPage() {
                         </button>
                     </div>
 
+                    {/* Success/Error Messages */}
+                    {successMessage && (
+                        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center justify-between">
+                            <div className="flex items-center">
+                                <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                <span>{successMessage}</span>
+                            </div>
+                            <button
+                                onClick={() => setSuccessMessage("")}
+                                className="text-green-600 hover:text-green-800 ml-4"
+                                aria-label="ปิดข้อความ"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
+
+                    {errorMessage && (
+                        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center justify-between">
+                            <div className="flex items-center">
+                                <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                                <span>{errorMessage}</span>
+                            </div>
+                            <button
+                                onClick={() => setErrorMessage("")}
+                                className="text-red-600 hover:text-red-800 ml-4"
+                                aria-label="ปิดข้อความ"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
+
                     {/* Filters */}
                     <MemberFilters
                         searchTerm={searchTerm}
@@ -182,6 +309,7 @@ export default function MemberManagementPage() {
                         members={filteredMembers}
                         onToggleStatus={handleToggleStatus}
                         onDeleteMember={handleDeleteMember}
+                        onEditMember={handleEditMember}
                         currentUserType={user?.role === "admin" || user?.role === "librarian" ? user.role : "librarian"}
                     />
 
@@ -193,6 +321,15 @@ export default function MemberManagementPage() {
                         newMemberForm={newMemberForm}
                         setNewMemberForm={setNewMemberForm}
                         userRole={user?.role || 'member'}
+                    />
+
+                    {/* Edit Member Dialog */}
+                    <EditMemberDialog
+                        isOpen={showEditDialog}
+                        onClose={handleCloseEditDialog}
+                        onUpdateMember={handleUpdateMember}
+                        member={selectedMember}
+                        existingMembers={members}
                     />
                 </div>
             </DashboardLayout>

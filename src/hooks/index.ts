@@ -7,6 +7,14 @@ export {
     useUserCreationValidation,
     type RolePermissions
 } from './useRolePermissions';
+export {
+    useMemberFormValidation,
+    useDebouncedValidation,
+    useMemberEditValidation,
+    type UseMemberFormValidationOptions,
+    type UseMemberFormValidationReturn,
+    type UseMemberEditValidationOptions
+} from './useMemberFormValidation';
 
 // You can add more hooks here in the future
 // export { useApi } from './useApi';

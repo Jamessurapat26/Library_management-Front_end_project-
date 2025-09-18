@@ -1,31 +1,62 @@
 import { useRolePermissions, useUserCreationValidation } from '@/hooks/useRolePermissions';
 import { useState } from 'react';
 
-interface NewMemberForm {
+/**
+ * Interface for new member form data
+ * Contains all fields required for creating a new member
+ */
+export interface NewMemberForm {
+    /** Member's full name */
     name: string;
+    /** Member's email address */
     email: string;
+    /** Member's phone number */
     phone: string;
+    /** Member's role in the system */
     role: "librarian" | "member";
+    /** Username (required for librarian accounts) */
     username?: string;
+    /** Password (required for librarian accounts) */
     password?: string;
 }
 
-interface FormErrors {
+/**
+ * Interface for form validation errors
+ * Contains optional error messages for each form field
+ */
+export interface AddMemberFormErrors {
+    /** Error message for role field */
     role?: string;
+    /** General error message not specific to any field */
     general?: string;
+    /** Error message for name field */
     name?: string;
+    /** Error message for email field */
     email?: string;
+    /** Error message for phone field */
     phone?: string;
+    /** Error message for username field */
     username?: string;
+    /** Error message for password field */
     password?: string;
 }
 
-interface AddMemberDialogProps {
+/**
+ * Props interface for the AddMemberDialog component
+ * Defines all required props for the add member dialog
+ */
+export interface AddMemberDialogProps {
+    /** Whether the dialog is currently open */
     isOpen: boolean;
+    /** Callback function to close the dialog */
     onClose: () => void;
+    /** Callback function to add a new member */
     onAddMember: () => void;
+    /** Current form data for the new member */
     newMemberForm: NewMemberForm;
+    /** Function to update the form data */
     setNewMemberForm: (form: NewMemberForm) => void;
+    /** Current user's role for permission checking */
     userRole: 'admin' | 'librarian' | 'member';
 }
 
@@ -39,7 +70,7 @@ export default function AddMemberDialog({
 }: AddMemberDialogProps) {
     const permissions = useRolePermissions();
     const { canCreateUser, getAvailableRoles } = useUserCreationValidation();
-    const [formErrors, setFormErrors] = useState<FormErrors>({});
+    const [formErrors, setFormErrors] = useState<AddMemberFormErrors>({});
 
     // Current user role is passed as prop for additional context
     // Role permissions are handled by useRolePermissions hook
@@ -191,7 +222,7 @@ export default function AddMemberDialog({
 
     // Validate form before submission
     const validateForm = (): boolean => {
-        const errors: FormErrors = {};
+        const errors: AddMemberFormErrors = {};
 
         // Validate role permissions
         const roleValidation = canCreateUser(newMemberForm.role);

@@ -1,14 +1,24 @@
 import { Member } from "@/mock/members";
 import { useState, Fragment } from "react";
 
-interface MemberTableProps {
+/**
+ * Props interface for the MemberTable component
+ * Defines all required props for displaying and managing the member table
+ */
+export interface MemberTableProps {
+    /** Array of members to display in the table */
     members: Member[];
+    /** Callback function to toggle member status (active/inactive) */
     onToggleStatus: (memberId: string) => void;
+    /** Callback function to delete a member */
     onDeleteMember: (memberId: string) => void;
+    /** Callback function to edit a member */
+    onEditMember: (member: Member) => void;
+    /** Current user type for permission checking */
     currentUserType?: "admin" | "librarian";
 }
 
-export default function MemberTable({ members, onToggleStatus, onDeleteMember, currentUserType = "admin" }: MemberTableProps) {
+export default function MemberTable({ members, onToggleStatus, onDeleteMember, onEditMember, currentUserType = "admin" }: MemberTableProps) {
     const [showCredentialsFor, setShowCredentialsFor] = useState<string | null>(null);
 
     const getRoleDisplayName = (role: string) => {
@@ -124,6 +134,14 @@ export default function MemberTable({ members, onToggleStatus, onDeleteMember, c
                                                 {showCredentialsFor === member.id ? "ซ่อน" : "ดู Login"}
                                             </button>
                                         )}
+
+                                        {/* Edit Button - Available for both admin and librarian */}
+                                        <button
+                                            onClick={() => onEditMember(member)}
+                                            className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium hover:bg-yellow-200 transition-colors"
+                                        >
+                                            แก้ไข
+                                        </button>
 
                                         <button
                                             onClick={() => onToggleStatus(member.id)}

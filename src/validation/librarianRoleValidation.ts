@@ -13,6 +13,11 @@
 
 import { adminSidebarItems, librarianSidebarItems } from '../components/Sidebar';
 
+interface SidebarItem {
+    href: string;
+    children?: SidebarItem[];
+}
+
 interface ValidationResult {
     test: string;
     passed: boolean;
@@ -29,12 +34,12 @@ class LibrarianRoleValidator {
     }
 
     // Extract routes from sidebar items
-    private extractRoutes(items: any[]): string[] {
+    private extractRoutes(items: SidebarItem[]): string[] {
         const routes: string[] = [];
         items.forEach(item => {
             routes.push(item.href);
             if (item.children) {
-                item.children.forEach((child: any) => {
+                item.children.forEach((child: SidebarItem) => {
                     routes.push(child.href);
                 });
             }
