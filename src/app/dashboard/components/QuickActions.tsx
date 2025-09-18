@@ -85,8 +85,8 @@ export default function QuickActions() {
         },
         {
             icon: <Settings className="w-6 h-6 text-gray-700" />,
-            title: "ตั้งค่าระบบ",
-            description: "จัดการการตั้งค่าและคอนฟิกระบบ",
+            title: "ตั้งค่า",
+            description: "จัดการการตั้งค่า",
             href: "/setting",
             color: "bg-gradient-to-r from-pink-100 to-pink-200"
         }

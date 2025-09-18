@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/Layout";
-import { SearchAndFilter, BookList, Pagination, BookFilters } from "./components";
+import { SearchAndFilter, BookList, Pagination, BookFilters, BorrowingDialog, BorrowForm } from "./components";
 import { mockBooks } from "@/mock";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 
@@ -48,6 +48,15 @@ export default function BooksPage() {
     });
     const [currentPage, setCurrentPage] = useState(1);
     const [loading] = useState(false);
+    const [forceUpdate, setForceUpdate] = useState(0); // For triggering re-renders
+
+    // Borrowing dialog state
+    const [showBorrowDialog, setShowBorrowDialog] = useState(false);
+    const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<{
+        id: string;
+        title: string;
+        availableCopies: number;
+    } | null>(null);
 
     // Dynamic items per page based on sidebar state
     const itemsPerPage = localCollapsed ? 12 : 9;
@@ -81,7 +90,8 @@ export default function BooksPage() {
 
             return matchesSearch && matchesCategory && matchesAvailability && matchesYear && matchesAuthor;
         });
-    }, [searchTerm, filters]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchTerm, filters, forceUpdate]); // forceUpdate needed to trigger re-render after borrow/return
 
     // Pagination
     const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
@@ -113,18 +123,151 @@ export default function BooksPage() {
     };
 
     const handleBorrow = (bookId: string) => {
-        // TODO: Implement borrow functionality
-        console.log('Borrowing book:', bookId);
-        // This would typically make an API call to borrow the book
-        alert(`ขณะนี้ระบบการยืมหนังสือยังไม่เปิดใช้งาน`);
+        const book = mockBooks.find(b => b.id === bookId);
+        if (!book) return;
+
+        // Calculate available copies in real-time
+        const availableCopies = book.copies.filter(copy => copy.status === "available").length;
+
+        if (availableCopies === 0) {
+            alert('หนังสือเล่มนี้ไม่มีให้ยืมในขณะนี้');
+            return;
+        }
+
+        setSelectedBookForBorrow({
+            id: book.id,
+            title: book.title,
+            availableCopies: availableCopies
+        });
+        setShowBorrowDialog(true);
+    };
+
+    const handleBorrowConfirm = (borrowForm: BorrowForm) => {
+        console.log('Borrowing book with details:', {
+            bookId: selectedBookForBorrow?.id,
+            borrowForm
+        });
+
+        // Find the book in mock data
+        const bookIndex = mockBooks.findIndex(book => book.id === selectedBookForBorrow?.id);
+        if (bookIndex === -1) {
+            alert('เกิดข้อผิดพลาด: ไม่พบหนังสือในระบบ');
+            return;
+        }
+
+        // Find the first available copy
+        const book = mockBooks[bookIndex];
+        const availableCopyIndex = book.copies.findIndex(copy => copy.status === "available");
+
+        if (availableCopyIndex === -1) {
+            alert('เกิดข้อผิดพลาด: ไม่มีเล่มว่างให้ยืม');
+            return;
+        }
+
+        try {
+            // Update the copy status to borrowed
+            mockBooks[bookIndex].copies[availableCopyIndex] = {
+                ...book.copies[availableCopyIndex],
+                status: "borrowed",
+                borrowedBy: borrowForm.borrowerName,
+                dueDate: borrowForm.dueDate
+            };
+
+            // Show success message
+            alert(`ยืมหนังสือ "${selectedBookForBorrow?.title}" สำเร็จ!\nผู้ยืม: ${borrowForm.borrowerName}\nกำหนดคืน: ${borrowForm.dueDate}\nรหัสเล่ม: ${book.copies[availableCopyIndex].copyId}`);
+
+            // Force re-render to show updated availability
+            setForceUpdate(prev => prev + 1);
+
+        } catch (error) {
+            console.error('Error updating book status:', error);
+            alert('เกิดข้อผิดพลาดในการยืมหนังสือ');
+        }
+
+        // Close dialog and reset state
+        setShowBorrowDialog(false);
+        setSelectedBookForBorrow(null);
     };
 
     const handleDelete = (bookId: string) => {
-        // TODO: Implement delete functionality
-        console.log('Deleting book:', bookId);
-        // This would typically make an API call to delete the book
-        if (window.confirm('คุณต้องการลบหนังสือเล่มนี้หรือไม่?')) {
-            alert(`ขณะนี้ระบบการลบหนังสือยังไม่เปิดใช้งาน`);
+        const book = mockBooks.find(b => b.id === bookId);
+        if (!book) return;
+
+        const borrowedCopies = book.copies.filter(copy => copy.status === "borrowed");
+
+        // Check if any copies are borrowed
+        if (borrowedCopies.length > 0) {
+            alert(`ไม่สามารถลบหนังสือได้ เนื่องจากมีคนยืมอยู่ ${borrowedCopies.length} เล่ม\n\nกรุณารอให้ผู้ยืมคืนหนังสือก่อน`);
+            return;
+        }
+
+        // Confirm deletion
+        const confirmDelete = window.confirm(
+            `คุณต้องการลบหนังสือ "${book.title}" ออกจากระบบหรือไม่?\n\nการลบนี้ไม่สามารถยกเลิกได้`
+        );
+
+        if (confirmDelete) {
+            try {
+                // Remove the book from mock data
+                const bookIndex = mockBooks.findIndex(b => b.id === bookId);
+                if (bookIndex !== -1) {
+                    mockBooks.splice(bookIndex, 1);
+
+                    alert(`ลบหนังสือ "${book.title}" สำเร็จแล้ว`);
+
+                    // Force re-render to show updated list
+                    setForceUpdate(prev => prev + 1);
+
+                    // Reset to first page if current page is empty
+                    if (paginatedBooks.length === 1 && currentPage > 1) {
+                        setCurrentPage(currentPage - 1);
+                    }
+                }
+            } catch (error) {
+                console.error('Error deleting book:', error);
+                alert('เกิดข้อผิดพลาดในการลบหนังสือ');
+            }
+        }
+    };
+
+    const handleReturn = (bookId: string) => {
+        const book = mockBooks.find(b => b.id === bookId);
+        if (!book) return;
+
+        const borrowedCopies = book.copies.filter(copy => copy.status === "borrowed");
+
+        if (borrowedCopies.length === 0) {
+            alert('หนังสือเล่มนี้ไม่มีเล่มที่ถูกยืมอยู่');
+            return;
+        }
+
+        // Show borrowed copies for return
+        const borrowedList = borrowedCopies.map(copy =>
+            `รหัส: ${copy.copyId} | ผู้ยืม: ${copy.borrowedBy} | กำหนดคืน: ${copy.dueDate}`
+        ).join('\n');
+
+        const confirmReturn = window.confirm(
+            `หนังสือที่ถูกยืมอยู่:\n${borrowedList}\n\nคุณต้องการคืนหนังสือเล่มแรกหรือไม่?`
+        );
+
+        if (confirmReturn && borrowedCopies.length > 0) {
+            const bookIndex = mockBooks.findIndex(b => b.id === bookId);
+            const copyIndex = mockBooks[bookIndex].copies.findIndex(
+                copy => copy.copyId === borrowedCopies[0].copyId
+            );
+
+            if (bookIndex !== -1 && copyIndex !== -1) {
+                // Return the book
+                mockBooks[bookIndex].copies[copyIndex] = {
+                    copyId: borrowedCopies[0].copyId,
+                    status: "available"
+                };
+
+                alert(`คืนหนังสือสำเร็จ!\nรหัสเล่ม: ${borrowedCopies[0].copyId}\nผู้คืน: ${borrowedCopies[0].borrowedBy}`);
+
+                // Force re-render
+                setForceUpdate(prev => prev + 1);
+            }
         }
     };
 
@@ -146,6 +289,7 @@ export default function BooksPage() {
                 loading={loading}
                 onBorrow={handleBorrow}
                 onDelete={handleDelete}
+                onReturn={handleReturn}
                 sidebarCollapsed={localCollapsed}
             />
 
@@ -159,6 +303,20 @@ export default function BooksPage() {
                         totalItems={filteredBooks.length}
                     />
                 </div>
+            )}
+
+            {/* Borrowing Dialog */}
+            {selectedBookForBorrow && (
+                <BorrowingDialog
+                    isOpen={showBorrowDialog}
+                    onClose={() => {
+                        setShowBorrowDialog(false);
+                        setSelectedBookForBorrow(null);
+                    }}
+                    onConfirm={handleBorrowConfirm}
+                    bookTitle={selectedBookForBorrow.title}
+                    availableCopies={selectedBookForBorrow.availableCopies}
+                />
             )}
         </DashboardLayout>
     );

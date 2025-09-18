@@ -30,10 +30,11 @@ interface BookListProps {
     loading?: boolean;
     onBorrow?: (bookId: string) => void;
     onDelete?: (bookId: string) => void;
+    onReturn?: (bookId: string) => void;
     sidebarCollapsed?: boolean;
 }
 
-function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId: string) => void; onDelete?: (bookId: string) => void }) {
+function BookCard({ book, onBorrow, onDelete, onReturn }: { book: Book; onBorrow?: (bookId: string) => void; onDelete?: (bookId: string) => void; onReturn?: (bookId: string) => void }) {
     const router = useRouter();
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -55,7 +56,13 @@ function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId
         return book.copies.filter((copy) => copy.status === "available").length;
     };
 
+    const getBorrowedCopies = () => {
+        return book.copies.filter((copy) => copy.status === "borrowed").length;
+    };
+
     const availableCopies = getAvailableCopies();
+    const borrowedCopies = getBorrowedCopies();
+    const canDelete = borrowedCopies === 0; // Can only delete if no borrowed copies
 
     const handleEdit = () => {
         router.push(`/admin/books/${book.id}/edit`);
@@ -65,6 +72,13 @@ function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId
     const handleDelete = () => {
         if (onDelete) {
             onDelete(book.id);
+        }
+        setShowMenu(false);
+    };
+
+    const handleReturn = () => {
+        if (onReturn) {
+            onReturn(book.id);
         }
         setShowMenu(false);
     };
@@ -167,19 +181,26 @@ function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId
 
                         {/* Dropdown Menu */}
                         {showMenu && (
-                            <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                            <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                                 <button
                                     onClick={handleEdit}
                                     className="w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left rounded-t-md"
                                 >
                                     แก้ไข
                                 </button>
+
+                                {/* Show delete option only if no borrowed copies */}
                                 {onDelete && (
                                     <button
                                         onClick={handleDelete}
-                                        className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 text-left rounded-b-md"
+                                        disabled={!canDelete}
+                                        className={`w-full px-3 py-2 text-sm text-left rounded-b-md ${canDelete
+                                            ? "text-red-600 hover:bg-red-50"
+                                            : "text-gray-400 cursor-not-allowed bg-gray-50"
+                                            }`}
+                                        title={!canDelete ? "ไม่สามารถลบได้ เนื่องจากมีคนยืมอยู่" : "ลบหนังสือ"}
                                     >
-                                        ลบ
+                                        ลบ {!canDelete && "(มีคนยืม)"}
                                     </button>
                                 )}
                             </div>
@@ -219,7 +240,7 @@ function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId
     );
 }
 
-export default function BookList({ books, loading = false, onBorrow, onDelete, sidebarCollapsed = false }: BookListProps) {
+export default function BookList({ books, loading = false, onBorrow, onDelete, onReturn, sidebarCollapsed = false }: BookListProps) {
     // Dynamic grid classes based on sidebar state
     const gridClasses = sidebarCollapsed
         ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
@@ -255,6 +276,7 @@ export default function BookList({ books, loading = false, onBorrow, onDelete, s
                     book={book}
                     onBorrow={onBorrow}
                     onDelete={onDelete}
+                    onReturn={onReturn}
                 />
             ))}
         </div>
