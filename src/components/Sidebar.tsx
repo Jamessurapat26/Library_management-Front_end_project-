@@ -305,8 +305,8 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   },
   {
     id: "settings",
-    label: "ตั้งค่าระบบ",
-    href: "/admin/settings",
+    label: "ตั้งค่า",
+    href: "/setting",
     icon: (
       <svg
         className="w-5 h-5"
