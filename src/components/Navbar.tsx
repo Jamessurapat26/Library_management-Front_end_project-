@@ -1,3 +1,8 @@
+'use client';
+
+import { useAuth } from '@/hooks/useAuth';
+import { SessionStatus } from './SessionStatus';
+
 interface NavbarProps {
   username?: string;
   userRole?: string;
@@ -11,6 +16,14 @@ export default function Navbar({
   title,
   onToggleSidebar,
 }: NavbarProps) {
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('คุณต้องการออกจากระบบหรือไม่?');
+    if (confirmLogout) {
+      logout('manual');
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center justify-between px-6">
@@ -40,6 +53,9 @@ export default function Navbar({
       </div>
 
       <div className="flex items-center space-x-4">
+        {/* Session Status */}
+        <SessionStatus showInNavbar={true} />
+
         {/* User Info */}
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
@@ -54,7 +70,10 @@ export default function Navbar({
         </div>
 
         {/* Logout Button */}
-        <button className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+        <button
+          onClick={handleLogout}
+          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+        >
           <svg
             className="w-4 h-4 mr-2"
             fill="none"

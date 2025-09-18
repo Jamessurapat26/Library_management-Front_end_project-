@@ -1,6 +1,7 @@
 'use client';
 
 import { DashboardLayout } from "@/components/Layout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useState, useEffect } from "react";
 import { mockMembers, Member } from "@/mock/members";
 import {
@@ -87,48 +88,50 @@ export default function SettingPage() {
     };
 
     return (
-        <DashboardLayout userType="admin" username="Admin" userRole="ผู้ดูแลระบบ">
-            <div className="max-w-6xl mx-auto">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">การตั้งค่า</h1>
-                    <p className="text-gray-600">จัดการข้อมูลส่วนตัวและการตั้งค่าระบบ</p>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    {/* Sidebar */}
-                    <div className="lg:col-span-1">
-                        <SettingsSidebar
-                            activeTab={activeTab}
-                            onTabChange={setActiveTab}
-                        />
+        <ProtectedRoute>
+            <DashboardLayout>
+                <div className="max-w-6xl mx-auto">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">การตั้งค่า</h1>
+                        <p className="text-gray-600">จัดการข้อมูลส่วนตัวและการตั้งค่าระบบ</p>
                     </div>
 
-                    {/* Main Content */}
-                    <div className="lg:col-span-3">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            {activeTab === 'profile' && (
-                                <ProfileTab
-                                    currentUser={currentUser}
-                                    onProfileUpdate={handleProfileUpdate}
-                                />
-                            )}
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        {/* Sidebar */}
+                        <div className="lg:col-span-1">
+                            <SettingsSidebar
+                                activeTab={activeTab}
+                                onTabChange={setActiveTab}
+                            />
+                        </div>
 
-                            {activeTab === 'security' && (
-                                <SecurityTab onPasswordChange={handlePasswordChange} />
-                            )}
+                        {/* Main Content */}
+                        <div className="lg:col-span-3">
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                {activeTab === 'profile' && (
+                                    <ProfileTab
+                                        currentUser={currentUser}
+                                        onProfileUpdate={handleProfileUpdate}
+                                    />
+                                )}
 
-                            {activeTab === 'notifications' && (
-                                <NotificationsTab onNotificationSave={handleNotificationSave} />
-                            )}
+                                {activeTab === 'security' && (
+                                    <SecurityTab onPasswordChange={handlePasswordChange} />
+                                )}
 
-                            {activeTab === 'system' && (
-                                <SystemTab onSystemSave={handleSystemSave} />
-                            )}
+                                {activeTab === 'notifications' && (
+                                    <NotificationsTab onNotificationSave={handleNotificationSave} />
+                                )}
+
+                                {activeTab === 'system' && (
+                                    <SystemTab onSystemSave={handleSystemSave} />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </DashboardLayout>
+            </DashboardLayout>
+        </ProtectedRoute>
     )
 }

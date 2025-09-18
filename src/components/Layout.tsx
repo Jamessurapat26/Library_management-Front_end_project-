@@ -4,7 +4,9 @@ import { ReactNode } from "react";
 import Sidebar, { SidebarItem, adminSidebarItems, librarianSidebarItems, memberSidebarItems } from "./Sidebar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { SessionStatus } from "./SessionStatus";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LayoutProps {
     children: ReactNode;
@@ -51,6 +53,9 @@ export default function Layout({
 
                 {/* Content Area */}
                 <div className="flex-1 flex flex-col">
+                    {/* Session Status Warning */}
+                    <SessionStatus className="mx-6 mt-2" />
+
                     {/* Main Content */}
                     <main className="flex-1 overflow-y-auto p-6">
                         {children}
@@ -65,14 +70,24 @@ export default function Layout({
 }
 
 // Pre-configured layout variants for different user roles
-interface DashboardLayoutProps extends Omit<LayoutProps, 'sidebarItems'> {
-    userType: 'admin' | 'librarian' | 'member';
+interface DashboardLayoutProps extends Omit<LayoutProps, 'sidebarItems' | 'username' | 'userRole'> {
+    userType?: 'admin' | 'librarian' | 'member'; // Optional for backward compatibility
 }
 
 export function DashboardLayout({ userType, ...props }: DashboardLayoutProps) {
+    const { user } = useAuth();
+
+    // Use authentication context data if available, fallback to userType prop
+    const currentUserType = user?.role || userType || 'admin';
+    const currentUsername = user?.displayName || user?.username || 'User';
+    const currentUserRole = user ? getRoleDisplayName(user.role) : (
+        currentUserType === 'admin' ? 'ผู้ดูแลระบบ' :
+            currentUserType === 'librarian' ? 'บรรณารักษ์' : 'สมาชิก'
+    );
+
     // Import sidebar items based on user type
     const getSidebarItems = () => {
-        switch (userType) {
+        switch (currentUserType) {
             case 'admin':
                 return adminSidebarItems;
             case 'librarian':
@@ -87,13 +102,23 @@ export function DashboardLayout({ userType, ...props }: DashboardLayoutProps) {
     return (
         <Layout
             sidebarItems={getSidebarItems()}
-            userRole={
-                userType === 'admin' ? 'ผู้ดูแลระบบ' :
-                    userType === 'librarian' ? 'บรรณารักษ์' : 'สมาชิก'
-            }
+            username={currentUsername}
+            userRole={currentUserRole}
             {...props}
         />
     );
+}
+
+// Helper function to get Thai display names for roles
+function getRoleDisplayName(role: string): string {
+    switch (role) {
+        case 'admin':
+            return 'ผู้ดูแลระบบ';
+        case 'librarian':
+            return 'บรรณารักษ์';
+        default:
+            return role;
+    }
 }
 
 // Simple layout without sidebar for public pages

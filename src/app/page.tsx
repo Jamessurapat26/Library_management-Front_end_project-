@@ -1,9 +1,13 @@
+'use client';
+
 import Link from "next/link";
 import Footer from "@/components/Footer"
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,7 +33,7 @@ export default function Home() {
               </h1>
             </div>
             <Link
-              href="/dashboard"
+              href="/auth/login"
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
             >
               เข้าสู่ระบบ
@@ -39,7 +43,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
             ระบบจัดการห้องสมุด
@@ -51,12 +55,25 @@ export default function Home() {
           </p>
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <div className="rounded-md shadow">
-              <Link
-                href="/dashboard"
-                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-colors"
-              >
-                เริ่มใช้งาน
-              </Link>
+              {isLoading ? (
+                <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-400 md:py-4 md:text-lg md:px-10">
+                  กำลังโหลด...
+                </div>
+              ) : isAuthenticated ? (
+                <Link
+                  href="/dashboard"
+                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-colors"
+                >
+                  เข้าสู่แดชบอร์ด
+                </Link>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-colors"
+                >
+                  เริ่มใช้งาน
+                </Link>
+              )}
             </div>
           </div>
         </div>

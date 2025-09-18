@@ -34,7 +34,7 @@ interface BookListProps {
     sidebarCollapsed?: boolean;
 }
 
-function BookCard({ book, onBorrow, onDelete, onReturn }: { book: Book; onBorrow?: (bookId: string) => void; onDelete?: (bookId: string) => void; onReturn?: (bookId: string) => void }) {
+function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId: string) => void; onDelete?: (bookId: string) => void; onReturn?: (bookId: string) => void }) {
     const router = useRouter();
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -76,12 +76,7 @@ function BookCard({ book, onBorrow, onDelete, onReturn }: { book: Book; onBorrow
         setShowMenu(false);
     };
 
-    const handleReturn = () => {
-        if (onReturn) {
-            onReturn(book.id);
-        }
-        setShowMenu(false);
-    };
+
 
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-visible relative">
@@ -240,7 +235,7 @@ function BookCard({ book, onBorrow, onDelete, onReturn }: { book: Book; onBorrow
     );
 }
 
-export default function BookList({ books, loading = false, onBorrow, onDelete, onReturn, sidebarCollapsed = false }: BookListProps) {
+export default function BookList({ books, loading = false, onBorrow, onDelete, sidebarCollapsed = false }: BookListProps) {
     // Dynamic grid classes based on sidebar state
     const gridClasses = sidebarCollapsed
         ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
@@ -276,7 +271,6 @@ export default function BookList({ books, loading = false, onBorrow, onDelete, o
                     book={book}
                     onBorrow={onBorrow}
                     onDelete={onDelete}
-                    onReturn={onReturn}
                 />
             ))}
         </div>

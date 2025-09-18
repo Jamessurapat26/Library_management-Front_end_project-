@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/Layout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SearchAndFilter, BookList, Pagination, BookFilters, BorrowingDialog, BorrowForm } from "./components";
 import { mockBooks } from "@/mock";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
@@ -272,52 +273,54 @@ export default function BooksPage() {
     };
 
     return (
-        <DashboardLayout userType="admin" username="Admin" userRole="ผู้ดูแลระบบ">
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">จัดการหนังสือ</h1>
-                <p className="text-gray-600">ค้นหาและจัดการหนังสือในห้องสมุด</p>
-            </div>
-
-            <SearchAndFilter
-                onSearch={handleSearch}
-                onFilterChange={handleFilterChange}
-                totalBooks={filteredBooks.length}
-            />
-
-            <BookList
-                books={paginatedBooks}
-                loading={loading}
-                onBorrow={handleBorrow}
-                onDelete={handleDelete}
-                onReturn={handleReturn}
-                sidebarCollapsed={localCollapsed}
-            />
-
-            {filteredBooks.length > 0 && (
-                <div className="mt-6">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                        itemsPerPage={itemsPerPage}
-                        totalItems={filteredBooks.length}
-                    />
+        <ProtectedRoute>
+            <DashboardLayout>
+                <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">จัดการหนังสือ</h1>
+                    <p className="text-gray-600">ค้นหาและจัดการหนังสือในห้องสมุด</p>
                 </div>
-            )}
 
-            {/* Borrowing Dialog */}
-            {selectedBookForBorrow && (
-                <BorrowingDialog
-                    isOpen={showBorrowDialog}
-                    onClose={() => {
-                        setShowBorrowDialog(false);
-                        setSelectedBookForBorrow(null);
-                    }}
-                    onConfirm={handleBorrowConfirm}
-                    bookTitle={selectedBookForBorrow.title}
-                    availableCopies={selectedBookForBorrow.availableCopies}
+                <SearchAndFilter
+                    onSearch={handleSearch}
+                    onFilterChange={handleFilterChange}
+                    totalBooks={filteredBooks.length}
                 />
-            )}
-        </DashboardLayout>
+
+                <BookList
+                    books={paginatedBooks}
+                    loading={loading}
+                    onBorrow={handleBorrow}
+                    onDelete={handleDelete}
+                    onReturn={handleReturn}
+                    sidebarCollapsed={localCollapsed}
+                />
+
+                {filteredBooks.length > 0 && (
+                    <div className="mt-6">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                            itemsPerPage={itemsPerPage}
+                            totalItems={filteredBooks.length}
+                        />
+                    </div>
+                )}
+
+                {/* Borrowing Dialog */}
+                {selectedBookForBorrow && (
+                    <BorrowingDialog
+                        isOpen={showBorrowDialog}
+                        onClose={() => {
+                            setShowBorrowDialog(false);
+                            setSelectedBookForBorrow(null);
+                        }}
+                        onConfirm={handleBorrowConfirm}
+                        bookTitle={selectedBookForBorrow.title}
+                        availableCopies={selectedBookForBorrow.availableCopies}
+                    />
+                )}
+            </DashboardLayout>
+        </ProtectedRoute>
     );
 }

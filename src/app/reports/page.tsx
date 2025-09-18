@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/Layout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { mockBooks } from '@/mock/books';
 import { mockMembers } from '@/mock/members';
 import { mockTransactions } from '@/mock/transactions';
@@ -70,50 +71,52 @@ export default function ReportsPage() {
     ];
 
     return (
-        <DashboardLayout userType="admin">
-            <div className="p-6 space-y-6">
-                {/* Header */}
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">รายงาน</h1>
-                    <p className="text-gray-600">รายงานสถิติและข้อมูลของระบบห้องสมุด</p>
-                </div>
-
-                {/* Report Type Selector */}
-                <ReportTypeSelector
-                    reportTypes={reportTypes}
-                    selectedReport={selectedReport}
-                    onSelectReport={setSelectedReport}
-                />
-
-                {/* Overview Report */}
-                {selectedReport === 'overview' && (
-                    <div className="space-y-6">
-                        {/* Statistics Cards */}
-                        <StatsCards stats={stats} />
-
-                        {/* Popular Books and Active Borrowers */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <PopularBooks books={popularBooks} />
-                            <ActiveBorrowers borrowers={activeBorrowers} />
-                        </div>
+        <ProtectedRoute>
+            <DashboardLayout>
+                <div className="p-6 space-y-6">
+                    {/* Header */}
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">รายงาน</h1>
+                        <p className="text-gray-600">รายงานสถิติและข้อมูลของระบบห้องสมุด</p>
                     </div>
-                )}
 
-                {/* Books Report */}
-                {selectedReport === 'books' && (
-                    <BooksReport categoryStats={categoryStats} />
-                )}
+                    {/* Report Type Selector */}
+                    <ReportTypeSelector
+                        reportTypes={reportTypes}
+                        selectedReport={selectedReport}
+                        onSelectReport={setSelectedReport}
+                    />
 
-                {/* Members Report */}
-                {selectedReport === 'members' && (
-                    <MembersReport stats={stats} members={members} />
-                )}
+                    {/* Overview Report */}
+                    {selectedReport === 'overview' && (
+                        <div className="space-y-6">
+                            {/* Statistics Cards */}
+                            <StatsCards stats={stats} />
 
-                {/* Transactions Report */}
-                {selectedReport === 'transactions' && (
-                    <TransactionsReport stats={stats} transactions={transactions} />
-                )}
-            </div>
-        </DashboardLayout>
+                            {/* Popular Books and Active Borrowers */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <PopularBooks books={popularBooks} />
+                                <ActiveBorrowers borrowers={activeBorrowers} />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Books Report */}
+                    {selectedReport === 'books' && (
+                        <BooksReport categoryStats={categoryStats} />
+                    )}
+
+                    {/* Members Report */}
+                    {selectedReport === 'members' && (
+                        <MembersReport stats={stats} members={members} />
+                    )}
+
+                    {/* Transactions Report */}
+                    {selectedReport === 'transactions' && (
+                        <TransactionsReport stats={stats} transactions={transactions} />
+                    )}
+                </div>
+            </DashboardLayout>
+        </ProtectedRoute>
     );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/Layout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import {
     TransactionFilters,
     TransactionStats,
@@ -146,50 +147,50 @@ export default function TransactionsPage() {
     };
 
     return (
-        <DashboardLayout userType="admin">
-            <div className="p-6 space-y-6">
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                            📚 การยืม-คืนหนังสือ
-                        </h1>
-                        <p className="text-gray-600 mt-1">จัดการการยืมและคืนหนังสือของสมาชิก</p>
+        <ProtectedRoute>
+            <DashboardLayout>
+                <div className="p-6 space-y-6">
+                    {/* Header */}
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">การยืม-คืนหนังสือ</h1>
+                            <p className="text-gray-600 mt-1">จัดการการยืมและคืนหนังสือของสมาชิก</p>
+                        </div>
+                        <button
+                            onClick={() => setShowBorrowDialog(true)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            ยืมหนังสือ
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setShowBorrowDialog(true)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        ยืมหนังสือ
-                    </button>
+
+                    {/* Stats */}
+                    <TransactionStats {...stats} />
+
+                    {/* Filters */}
+                    <TransactionFilters
+                        onSearch={handleSearch}
+                        onFilterChange={handleFilterChange}
+                    />
+
+                    {/* Transactions Table */}
+                    <TransactionTable
+                        transactions={filteredTransactions}
+                        onReturnBook={handleReturnBook}
+                        onExtendDueDate={handleExtendDueDate}
+                    />
+
+                    {/* Borrow Book Dialog */}
+                    <BorrowBookDialog
+                        isOpen={showBorrowDialog}
+                        onClose={() => setShowBorrowDialog(false)}
+                        onSubmit={handleBorrowBook}
+                    />
                 </div>
-
-                {/* Stats */}
-                <TransactionStats {...stats} />
-
-                {/* Filters */}
-                <TransactionFilters
-                    onSearch={handleSearch}
-                    onFilterChange={handleFilterChange}
-                />
-
-                {/* Transactions Table */}
-                <TransactionTable
-                    transactions={filteredTransactions}
-                    onReturnBook={handleReturnBook}
-                    onExtendDueDate={handleExtendDueDate}
-                />
-
-                {/* Borrow Book Dialog */}
-                <BorrowBookDialog
-                    isOpen={showBorrowDialog}
-                    onClose={() => setShowBorrowDialog(false)}
-                    onSubmit={handleBorrowBook}
-                />
-            </div>
-        </DashboardLayout>
+            </DashboardLayout>
+        </ProtectedRoute>
     );
 }
