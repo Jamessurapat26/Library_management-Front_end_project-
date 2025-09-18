@@ -11,16 +11,21 @@ import {
     type Member
 } from "./components";
 import { mockMembers } from "@/mock";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserCreationValidation } from "@/hooks/useRolePermissions";
 
 interface NewMemberForm {
     name: string;
     email: string;
     phone: string;
     role: "librarian" | "member";
+    username?: string;
+    password?: string;
 }
 
 export default function MemberManagementPage() {
-    const [currentUserType] = useState<"admin" | "librarian">("admin"); // This would come from auth
+    const { user } = useAuth();
+    const { canCreateUser } = useUserCreationValidation();
     const [members, setMembers] = useState<Member[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -37,6 +42,17 @@ export default function MemberManagementPage() {
     useEffect(() => {
         setMembers(mockMembers);
     }, []);
+
+    // Reset form when dialog opens to ensure valid default role
+    const handleOpenAddDialog = () => {
+        setNewMemberForm({
+            name: "",
+            email: "",
+            phone: "",
+            role: "member" // Always default to member as it's available for all users
+        });
+        setShowAddDialog(true);
+    };
 
     const filteredMembers = members.filter(member => {
         const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -60,14 +76,22 @@ export default function MemberManagementPage() {
     };
 
     const handleAddMember = () => {
+        // Basic validation (detailed validation is now handled in the dialog)
         if (!newMemberForm.name || !newMemberForm.email || !newMemberForm.phone) {
             alert("กรุณากรอกข้อมูลให้ครบถ้วน");
             return;
         }
 
-        // Check if librarian is trying to create admin/librarian
-        if (currentUserType === "librarian" && newMemberForm.role === "librarian") {
-            alert("บรรณารักษ์ไม่สามารถเพิ่มบรรณารักษ์ได้");
+        // Final validation of user creation permissions
+        const validation = canCreateUser(newMemberForm.role);
+        if (!validation.allowed) {
+            alert(validation.errorMessage);
+            return;
+        }
+
+        // Additional validation for librarian credentials
+        if (newMemberForm.role === "librarian" && (!newMemberForm.username || !newMemberForm.password)) {
+            alert("กรุณากรอกข้อมูล Username และ Password สำหรับบรรณารักษ์");
             return;
         }
 
@@ -81,7 +105,12 @@ export default function MemberManagementPage() {
             status: "active",
             joinDate: new Date().toISOString().split("T")[0],
             borrowedBooks: 0,
-            overdueBooks: 0
+            overdueBooks: 0,
+            // Add credentials for librarian
+            ...(newMemberForm.role === "librarian" && {
+                username: newMemberForm.username,
+                password: newMemberForm.password
+            })
         };
 
         setMembers([...members, newMember]);
@@ -124,7 +153,7 @@ export default function MemberManagementPage() {
                             </p>
                         </div>
                         <button
-                            onClick={() => setShowAddDialog(true)}
+                            onClick={handleOpenAddDialog}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +182,7 @@ export default function MemberManagementPage() {
                         members={filteredMembers}
                         onToggleStatus={handleToggleStatus}
                         onDeleteMember={handleDeleteMember}
-                        currentUserType={currentUserType}
+                        currentUserType={user?.role === "admin" || user?.role === "librarian" ? user.role : "librarian"}
                     />
 
                     {/* Add Member Dialog */}
@@ -161,9 +190,9 @@ export default function MemberManagementPage() {
                         isOpen={showAddDialog}
                         onClose={() => setShowAddDialog(false)}
                         onAddMember={handleAddMember}
-                        currentUserType={currentUserType}
                         newMemberForm={newMemberForm}
                         setNewMemberForm={setNewMemberForm}
+                        userRole={user?.role || 'member'}
                     />
                 </div>
             </DashboardLayout>
