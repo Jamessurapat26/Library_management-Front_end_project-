@@ -1,3 +1,8 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { mockBooks, mockMembers, mockTransactions } from '@/mock';
+
 interface StatCardProps {
     title: string;
     value: string | number;
@@ -23,10 +28,67 @@ function StatCard({ title, value, icon, bgColor, textColor }: StatCardProps) {
 }
 
 export default function StatsCards() {
-    const stats = [
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [stats, setStats] = useState({
+        totalBooks: 0,
+        totalMembers: 0,
+        todayBorrows: 0,
+        overdueBooks: 0
+    });
+
+    // Function to calculate statistics
+    const calculateStats = () => {
+        const now = new Date();
+
+        // Calculate statistics from mock data
+        const totalBooks = mockBooks.reduce((sum, book) => sum + book.totalCopies, 0);
+        const totalMembers = mockMembers.filter(member => member.status === 'active').length;
+
+        // Get today's date for filtering transactions
+        const today = now.toISOString().split('T')[0];
+        const todayBorrows = mockTransactions.filter(
+            transaction => transaction.type === 'borrow' &&
+                transaction.borrowDate === today
+        ).length;
+
+        // Calculate overdue books
+        const overdueBooks = mockTransactions.filter(transaction => {
+            if (transaction.status === 'active') {
+                const dueDate = new Date(transaction.dueDate);
+                return dueDate < now;
+            }
+            return false;
+        }).length;
+
+        return {
+            totalBooks,
+            totalMembers,
+            todayBorrows,
+            overdueBooks
+        };
+    };
+
+    // Update stats on component mount and every 30 seconds
+    useEffect(() => {
+        const updateStats = () => {
+            setStats(calculateStats());
+            setCurrentTime(new Date());
+        };
+
+        // Initial calculation
+        updateStats();
+
+        // Set up interval for real-time updates (every 30 seconds)
+        const interval = setInterval(updateStats, 1000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(interval);
+    }, []);
+
+    const statsData = [
         {
             title: "จำนวนหนังสือทั้งหมด",
-            value: "1,234",
+            value: stats.totalBooks.toLocaleString(),
             bgColor: "bg-blue-100",
             textColor: "text-blue-600",
             icon: (
@@ -37,7 +99,7 @@ export default function StatsCards() {
         },
         {
             title: "สมาชิกทั้งหมด",
-            value: "567",
+            value: stats.totalMembers.toLocaleString(),
             bgColor: "bg-green-100",
             textColor: "text-green-600",
             icon: (
@@ -48,7 +110,7 @@ export default function StatsCards() {
         },
         {
             title: "หนังสือที่ยืมวันนี้",
-            value: "89",
+            value: stats.todayBorrows.toLocaleString(),
             bgColor: "bg-yellow-100",
             textColor: "text-yellow-600",
             icon: (
@@ -59,7 +121,7 @@ export default function StatsCards() {
         },
         {
             title: "หนังสือเกินกำหนด",
-            value: "23",
+            value: stats.overdueBooks.toLocaleString(),
             bgColor: "bg-red-100",
             textColor: "text-red-600",
             icon: (
@@ -71,17 +133,24 @@ export default function StatsCards() {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
-                <StatCard
-                    key={index}
-                    title={stat.title}
-                    value={stat.value}
-                    icon={stat.icon}
-                    bgColor={stat.bgColor}
-                    textColor={stat.textColor}
-                />
-            ))}
+        <div className="space-y-4">
+            {/* Last Updated Timestamp */}
+            <div className="text-xs text-gray-500 text-right">
+                อัพเดทล่าสุด: {currentTime.toLocaleTimeString('th-TH')}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {statsData.map((stat, index) => (
+                    <StatCard
+                        key={index}
+                        title={stat.title}
+                        value={stat.value}
+                        icon={stat.icon}
+                        bgColor={stat.bgColor}
+                        textColor={stat.textColor}
+                    />
+                ))}
+            </div>
         </div>
     );
 }

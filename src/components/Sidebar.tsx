@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export interface SidebarItem {
   id: string;
@@ -153,10 +154,10 @@ export default function Sidebar({
 }
 
 // Predefined menu items for different user roles
-export const getAdminSidebarItems = (): SidebarItem[] => [
+export const getAdminSidebarItems = (t: (key: string) => string): SidebarItem[] => [
   {
     id: "dashboard",
-    label: "แดชบอร์ด",
+    label: t("nav.dashboard"),
     href: "/dashboard",
     icon: (
       <svg
@@ -182,7 +183,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   },
   {
     id: "books",
-    label: "จัดการหนังสือ",
+    label: t("nav.books.manage"),
     href: "/books",
     icon: (
       <svg
@@ -202,7 +203,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
     children: [
       {
         id: "books-list",
-        label: "รายการหนังสือ",
+        label: t("nav.books.list"),
         href: "/books",
         icon: (
           <svg
@@ -222,7 +223,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
       },
       {
         id: "books-add",
-        label: "เพิ่มหนังสือใหม่",
+        label: t("nav.books.add"),
         href: "/books/add",
         icon: (
           <svg
@@ -244,7 +245,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   },
   {
     id: "members",
-    label: "จัดการสมาชิก",
+    label: t("nav.members.manage"),
     href: "/members",
     icon: (
       <svg
@@ -264,7 +265,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   },
   {
     id: "transactions",
-    label: "การยืม-คืน",
+    label: t("nav.transactions"),
     href: "/transactions",
     // badge: "5", // Static badge for UI demo
     icon: (
@@ -285,7 +286,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   },
   {
     id: "reports",
-    label: "รายงาน",
+    label: t("nav.reports"),
     href: "/reports",
     icon: (
       <svg
@@ -305,7 +306,7 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   },
   {
     id: "settings",
-    label: "ตั้งค่า",
+    label: t("nav.settings"),
     href: "/setting",
     icon: (
       <svg
@@ -331,12 +332,10 @@ export const getAdminSidebarItems = (): SidebarItem[] => [
   },
 ];
 
-export const adminSidebarItems: SidebarItem[] = getAdminSidebarItems();
-
-export const librarianSidebarItems: SidebarItem[] = [
+export const getLibrarianSidebarItems = (t: (key: string) => string): SidebarItem[] => [
   {
     id: "dashboard",
-    label: "แดชบอร์ด",
+    label: t("nav.dashboard"),
     href: "/dashboard",
     icon: (
       <svg
@@ -362,7 +361,7 @@ export const librarianSidebarItems: SidebarItem[] = [
   },
   {
     id: "books",
-    label: "จัดการหนังสือ",
+    label: t("nav.books.manage"),
     href: "/books",
     icon: (
       <svg
@@ -382,7 +381,7 @@ export const librarianSidebarItems: SidebarItem[] = [
     children: [
       {
         id: "books-list",
-        label: "รายการหนังสือ",
+        label: t("nav.books.list"),
         href: "/books",
         icon: (
           <svg
@@ -402,7 +401,7 @@ export const librarianSidebarItems: SidebarItem[] = [
       },
       {
         id: "books-add",
-        label: "เพิ่มหนังสือใหม่",
+        label: t("nav.books.add"),
         href: "/books/add",
         icon: (
           <svg
@@ -424,7 +423,7 @@ export const librarianSidebarItems: SidebarItem[] = [
   },
   {
     id: "members",
-    label: "จัดการสมาชิก",
+    label: t("nav.members.manage"),
     href: "/members",
     icon: (
       <svg
@@ -444,7 +443,7 @@ export const librarianSidebarItems: SidebarItem[] = [
   },
   {
     id: "transactions",
-    label: "การยืม-คืน",
+    label: t("nav.transactions"),
     href: "/transactions",
     icon: (
       <svg
@@ -464,7 +463,7 @@ export const librarianSidebarItems: SidebarItem[] = [
   },
   {
     id: "reports",
-    label: "รายงาน",
+    label: t("nav.reports"),
     href: "/reports",
     icon: (
       <svg
@@ -484,7 +483,7 @@ export const librarianSidebarItems: SidebarItem[] = [
   },
   {
     id: "settings",
-    label: "ตั้งค่า",
+    label: t("nav.settings"),
     href: "/setting",
     icon: (
       <svg
@@ -510,10 +509,10 @@ export const librarianSidebarItems: SidebarItem[] = [
   },
 ];
 
-export const memberSidebarItems: SidebarItem[] = [
+export const getMemberSidebarItems = (t: (key: string) => string): SidebarItem[] => [
   {
     id: "dashboard",
-    label: "แดชบอร์ด",
+    label: t("nav.dashboard"),
     href: "/member/dashboard",
     icon: (
       <svg
@@ -539,7 +538,7 @@ export const memberSidebarItems: SidebarItem[] = [
   },
   {
     id: "search",
-    label: "ค้นหาหนังสือ",
+    label: t("nav.books.search"),
     href: "/member/search",
     icon: (
       <svg
@@ -559,7 +558,7 @@ export const memberSidebarItems: SidebarItem[] = [
   },
   {
     id: "my-books",
-    label: "หนังสือที่ยืม",
+    label: t("nav.books.borrowed"),
     href: "/member/borrowed",
     badge: "3",
     icon: (
@@ -580,7 +579,7 @@ export const memberSidebarItems: SidebarItem[] = [
   },
   {
     id: "history",
-    label: "ประวัติการยืม",
+    label: t("nav.history"),
     href: "/member/history",
     icon: (
       <svg
@@ -600,7 +599,7 @@ export const memberSidebarItems: SidebarItem[] = [
   },
   {
     id: "profile",
-    label: "ข้อมูลส่วนตัว",
+    label: t("nav.profile"),
     href: "/member/profile",
     icon: (
       <svg
@@ -619,3 +618,8 @@ export const memberSidebarItems: SidebarItem[] = [
     ),
   },
 ];
+
+// Legacy exports for backward compatibility - these will use the translation function
+export const adminSidebarItems: SidebarItem[] = [];
+export const librarianSidebarItems: SidebarItem[] = [];
+export const memberSidebarItems: SidebarItem[] = [];

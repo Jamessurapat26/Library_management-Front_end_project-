@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { SearchAndFilter, BookList, Pagination, BookFilters, BorrowingDialog, BorrowForm } from "./components";
 import { mockBooks } from "@/mock";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
+import { useLanguage } from "@/hooks/useLanguage";
+import { SearchAndFilter, BookList, Pagination, BookFilters, BorrowingDialog, BorrowForm } from "./components";
 
 export default function BooksPage() {
     const { isCollapsed } = useSidebarCollapse(false);
+    const { t } = useLanguage();
     const [localCollapsed, setLocalCollapsed] = useState(isCollapsed);
 
     // Listen for localStorage changes to sync across components
@@ -56,6 +58,7 @@ export default function BooksPage() {
     const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<{
         id: string;
         title: string;
+        isbn: string;
         availableCopies: number;
     } | null>(null);
 
@@ -138,6 +141,7 @@ export default function BooksPage() {
         setSelectedBookForBorrow({
             id: book.id,
             title: book.title,
+            isbn: book.isbn,
             availableCopies: availableCopies
         });
         setShowBorrowDialog(true);
@@ -272,12 +276,90 @@ export default function BooksPage() {
         }
     };
 
+    const handleEdit = async (bookId: string, updatedBookData: any): Promise<{ success: boolean; message?: string }> => {
+        try {
+            // Find the book in mock data
+            const bookIndex = mockBooks.findIndex(book => book.id === bookId);
+            if (bookIndex === -1) {
+                return { success: false, message: 'ไม่พบหนังสือในระบบ' };
+            }
+
+            const currentBook = mockBooks[bookIndex];
+            const borrowedCopies = currentBook.copies.filter(copy => copy.status === 'borrowed').length;
+
+            // Validate total copies
+            if (updatedBookData.totalCopies < borrowedCopies) {
+                return {
+                    success: false,
+                    message: `จำนวนเล่มใหม่ (${updatedBookData.totalCopies}) ต้องไม่น้อยกว่าจำนวนที่ถูกยืมอยู่ (${borrowedCopies})`
+                };
+            }
+
+            // Check for duplicate ISBN (excluding current book)
+            const duplicateISBN = mockBooks.find(book =>
+                book.id !== bookId && book.isbn === updatedBookData.isbn
+            );
+            if (duplicateISBN) {
+                return { success: false, message: 'ISBN นี้มีอยู่ในระบบแล้ว' };
+            }
+
+            // Update the book data
+            const updatedBook = {
+                ...currentBook,
+                title: updatedBookData.title,
+                isbn: updatedBookData.isbn,
+                author: updatedBookData.author,
+                publisher: updatedBookData.publisher,
+                publishYear: updatedBookData.publishYear,
+                category: updatedBookData.category,
+                description: updatedBookData.description,
+                totalCopies: updatedBookData.totalCopies
+            };
+
+            // Adjust copies array if totalCopies changed
+            if (updatedBookData.totalCopies !== currentBook.totalCopies) {
+                const currentCopies = [...currentBook.copies];
+
+                if (updatedBookData.totalCopies > currentBook.totalCopies) {
+                    // Add new available copies
+                    const copiesToAdd = updatedBookData.totalCopies - currentBook.totalCopies;
+                    for (let i = 0; i < copiesToAdd; i++) {
+                        currentCopies.push({
+                            copyId: `${bookId}-${currentCopies.length + 1}`,
+                            status: 'available'
+                        });
+                    }
+                } else if (updatedBookData.totalCopies < currentBook.totalCopies) {
+                    // Remove available copies (keep borrowed ones)
+                    const availableCopies = currentCopies.filter(copy => copy.status === 'available');
+                    const borrowedCopiesToKeep = currentCopies.filter(copy => copy.status === 'borrowed');
+                    const availableCopiesToKeep = availableCopies.slice(0, updatedBookData.totalCopies - borrowedCopiesToKeep.length);
+                    currentCopies.splice(0, currentCopies.length, ...borrowedCopiesToKeep, ...availableCopiesToKeep);
+                }
+
+                updatedBook.copies = currentCopies;
+            }
+
+            // Update the book in mock data
+            mockBooks[bookIndex] = updatedBook;
+
+            // Force re-render
+            setForceUpdate(prev => prev + 1);
+
+            return { success: true, message: 'อัพเดทข้อมูลหนังสือสำเร็จ' };
+
+        } catch (error) {
+            console.error('Error updating book:', error);
+            return { success: false, message: 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล' };
+        }
+    };
+
     return (
         <ProtectedRoute>
             <DashboardLayout>
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">จัดการหนังสือ</h1>
-                    <p className="text-gray-600">ค้นหาและจัดการหนังสือในห้องสมุด</p>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("page.books.title")}</h1>
+                    <p className="text-gray-600">{t("page.books.subtitle")}</p>
                 </div>
 
                 <SearchAndFilter
@@ -292,6 +374,7 @@ export default function BooksPage() {
                     onBorrow={handleBorrow}
                     onDelete={handleDelete}
                     onReturn={handleReturn}
+                    onEdit={handleEdit}
                     sidebarCollapsed={localCollapsed}
                 />
 
@@ -317,6 +400,8 @@ export default function BooksPage() {
                         }}
                         onConfirm={handleBorrowConfirm}
                         bookTitle={selectedBookForBorrow.title}
+                        bookId={selectedBookForBorrow.id}
+                        bookIsbn={selectedBookForBorrow.isbn}
                         availableCopies={selectedBookForBorrow.availableCopies}
                     />
                 )}

@@ -12,8 +12,12 @@ import {
     type BorrowBookData
 } from './components';
 import { mockTransactions, type Transaction } from '@/mock/transactions';
+import { mockBooks } from '@/mock/books';
+import { mockMembers } from '@/mock/members';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function TransactionsPage() {
+    const { t } = useLanguage();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
     const [showBorrowDialog, setShowBorrowDialog] = useState(false);
@@ -23,12 +27,64 @@ export default function TransactionsPage() {
         type: 'all',
         dateRange: 'all'
     });
+    const [dataVersion, setDataVersion] = useState(0); // For triggering re-fetch
 
-    // Load mock data
+    // Load mock data and sync with original mockTransactions
     useEffect(() => {
-        setTransactions(mockTransactions);
-        setFilteredTransactions(mockTransactions);
-    }, []);
+        const loadTransactions = () => {
+            // Create a deep copy to avoid direct mutation
+            const transactionsCopy = JSON.parse(JSON.stringify(mockTransactions));
+            setTransactions(transactionsCopy);
+            setFilteredTransactions(transactionsCopy);
+        };
+
+        loadTransactions();
+    }, [dataVersion]); // Re-run when dataVersion changes
+
+    // Function to update both local state and mock data
+    const updateMockData = (updatedTransactions: Transaction[]) => {
+        // Update local state
+        setTransactions(updatedTransactions);
+
+        // Update original mock data
+        mockTransactions.length = 0; // Clear array
+        mockTransactions.push(...updatedTransactions); // Add new data
+
+        console.log('Mock data updated:', mockTransactions);
+    };
+
+    // Check for overdue transactions every minute
+    useEffect(() => {
+        const checkOverdueTransactions = () => {
+            const now = new Date();
+            const updatedTransactions = transactions.map(transaction => {
+                if (transaction.status === 'active') {
+                    const dueDate = new Date(transaction.dueDate);
+                    if (dueDate < now) {
+                        return { ...transaction, status: 'overdue' as const };
+                    }
+                }
+                return transaction;
+            });
+
+            // Only update if there are changes
+            const hasChanges = updatedTransactions.some((t, index) =>
+                t.status !== transactions[index]?.status
+            );
+
+            if (hasChanges) {
+                updateMockData(updatedTransactions);
+            }
+        };
+
+        // Initial check
+        checkOverdueTransactions();
+
+        // Set up interval to check every minute
+        const interval = setInterval(checkOverdueTransactions, 60000);
+
+        return () => clearInterval(interval);
+    }, [transactions]);
 
     // Apply filters and search
     useEffect(() => {
@@ -91,16 +147,25 @@ export default function TransactionsPage() {
     };
 
     const handleBorrowBook = (borrowData: BorrowBookData) => {
+        // Find book and member information
+        const book = mockBooks.find(b => b.id === borrowData.bookId);
+        const member = mockMembers.find(m => m.id === borrowData.memberId);
+
+        if (!book || !member) {
+            console.error('Book or member not found');
+            return;
+        }
+
         // Generate new transaction
         const newTransaction: Transaction = {
-            id: `TXN${Date.now()}`,
+            id: `TXN${String(transactions.length + 1).padStart(3, '0')}`,
             type: 'borrow',
             bookId: borrowData.bookId,
-            bookTitle: '', // Would be fetched from book data
-            bookIsbn: '', // Would be fetched from book data
+            bookTitle: book.title,
+            bookIsbn: book.isbn,
             memberId: borrowData.memberId,
-            memberName: '', // Would be fetched from member data
-            memberNumber: '', // Would be fetched from member data
+            memberName: member.name,
+            memberNumber: member.memberNumber,
             borrowDate: new Date().toISOString().split('T')[0],
             dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
             status: 'active',
@@ -109,30 +174,97 @@ export default function TransactionsPage() {
             notes: borrowData.notes
         };
 
-        setTransactions([newTransaction, ...transactions]);
+        // Update transactions
+        const updatedTransactions = [newTransaction, ...transactions];
+        updateMockData(updatedTransactions);
+
+        // Update book copies status
+        const bookIndex = mockBooks.findIndex(b => b.id === borrowData.bookId);
+        if (bookIndex !== -1) {
+            const availableCopyIndex = mockBooks[bookIndex].copies.findIndex(copy => copy.status === 'available');
+            if (availableCopyIndex !== -1) {
+                mockBooks[bookIndex].copies[availableCopyIndex] = {
+                    ...mockBooks[bookIndex].copies[availableCopyIndex],
+                    status: 'borrowed',
+                    borrowedBy: member.name,
+                    dueDate: newTransaction.dueDate
+                };
+            }
+        }
+
+        // Update member's borrowed books count
+        const memberIndex = mockMembers.findIndex(m => m.id === borrowData.memberId);
+        if (memberIndex !== -1) {
+            mockMembers[memberIndex].borrowedBooks += 1;
+        }
+
+        console.log('New transaction created:', newTransaction);
     };
 
     const handleReturnBook = (transactionId: string) => {
-        setTransactions(transactions.map(transaction =>
-            transaction.id === transactionId
-                ? {
+        const updatedTransactions = transactions.map(transaction => {
+            if (transaction.id === transactionId) {
+                // Find and update book copy status
+                const bookIndex = mockBooks.findIndex(b => b.id === transaction.bookId);
+                if (bookIndex !== -1) {
+                    const borrowedCopyIndex = mockBooks[bookIndex].copies.findIndex(
+                        copy => copy.status === 'borrowed' && copy.borrowedBy === transaction.memberName
+                    );
+                    if (borrowedCopyIndex !== -1) {
+                        mockBooks[bookIndex].copies[borrowedCopyIndex] = {
+                            copyId: mockBooks[bookIndex].copies[borrowedCopyIndex].copyId,
+                            status: 'available'
+                        };
+                    }
+                }
+
+                // Update member's borrowed books count
+                const memberIndex = mockMembers.findIndex(m => m.id === transaction.memberId);
+                if (memberIndex !== -1 && mockMembers[memberIndex].borrowedBooks > 0) {
+                    mockMembers[memberIndex].borrowedBooks -= 1;
+                }
+
+                return {
                     ...transaction,
                     status: 'returned' as const,
                     returnDate: new Date().toISOString().split('T')[0]
-                }
-                : transaction
-        ));
+                };
+            }
+            return transaction;
+        });
+
+        updateMockData(updatedTransactions);
     };
 
     const handleExtendDueDate = (transactionId: string) => {
-        setTransactions(transactions.map(transaction =>
-            transaction.id === transactionId
-                ? {
-                    ...transaction,
-                    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Extend 14 days
+        const updatedTransactions = transactions.map(transaction => {
+            if (transaction.id === transactionId) {
+                const newDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+                // Update book copy due date
+                const bookIndex = mockBooks.findIndex(b => b.id === transaction.bookId);
+                if (bookIndex !== -1) {
+                    const borrowedCopyIndex = mockBooks[bookIndex].copies.findIndex(
+                        copy => copy.status === 'borrowed' && copy.borrowedBy === transaction.memberName
+                    );
+                    if (borrowedCopyIndex !== -1) {
+                        mockBooks[bookIndex].copies[borrowedCopyIndex] = {
+                            ...mockBooks[bookIndex].copies[borrowedCopyIndex],
+                            dueDate: newDueDate
+                        };
+                    }
                 }
-                : transaction
-        ));
+
+                return {
+                    ...transaction,
+                    dueDate: newDueDate,
+                    status: 'active' as const // Reset status if it was overdue
+                };
+            }
+            return transaction;
+        });
+
+        updateMockData(updatedTransactions);
     };
 
     // Calculate stats
@@ -153,8 +285,8 @@ export default function TransactionsPage() {
                     {/* Header */}
                     <div className="flex justify-between items-center">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">การยืม-คืนหนังสือ</h1>
-                            <p className="text-gray-600 mt-1">จัดการการยืมและคืนหนังสือของสมาชิก</p>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("page.transactions.title")}</h1>
+                            <p className="text-gray-600 mt-1">{t("page.transactions.subtitle")}</p>
                         </div>
                         <button
                             onClick={() => setShowBorrowDialog(true)}
@@ -163,7 +295,7 @@ export default function TransactionsPage() {
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            ยืมหนังสือ
+                            {t("button.borrow.book")}
                         </button>
                     </div>
 

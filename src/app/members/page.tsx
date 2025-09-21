@@ -13,8 +13,10 @@ import {
     type EditMemberForm
 } from "./components";
 import { mockMembers } from "@/mock";
+import { createMemberWithUser, updateMemberWithUser } from "@/mock/userMemberMapping";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCreationValidation } from "@/hooks/useRolePermissions";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface NewMemberForm {
     name: string;
@@ -28,6 +30,7 @@ interface NewMemberForm {
 export default function MemberManagementPage() {
     const { user } = useAuth();
     const { canCreateUser } = useUserCreationValidation();
+    const { t } = useLanguage();
     const [members, setMembers] = useState<Member[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -44,9 +47,22 @@ export default function MemberManagementPage() {
     const [successMessage, setSuccessMessage] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
 
-    // Load mock data
+    // Load mock data and set up real-time updates
     useEffect(() => {
-        setMembers(mockMembers);
+        const updateMembersData = () => {
+            // Create a deep copy to avoid direct mutation
+            const membersCopy = JSON.parse(JSON.stringify(mockMembers));
+            setMembers(membersCopy);
+        };
+
+        // Initial load
+        updateMembersData();
+
+        // Set up interval for real-time updates (every 5 seconds)
+        const interval = setInterval(updateMembersData, 5000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(interval);
     }, []);
 
     // Reset form when dialog opens to ensure valid default role
@@ -70,17 +86,6 @@ export default function MemberManagementPage() {
         return matchesSearch && matchesRole && matchesStatus;
     });
 
-    const generateMemberNumber = (role: "librarian" | "member"): string => {
-        const prefix = role === "librarian" ? "LIB" : "MEM";
-        const existingNumbers = members
-            .filter(m => m.memberNumber.startsWith(prefix))
-            .map(m => parseInt(m.memberNumber.slice(3)))
-            .filter(n => !isNaN(n));
-
-        const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
-        return `${prefix}${nextNumber.toString().padStart(3, "0")}`;
-    };
-
     const handleAddMember = () => {
         // Basic validation (detailed validation is now handled in the dialog)
         if (!newMemberForm.name || !newMemberForm.email || !newMemberForm.phone) {
@@ -101,45 +106,63 @@ export default function MemberManagementPage() {
             return;
         }
 
-        const newMember: Member = {
-            id: (members.length + 1).toString(),
-            memberNumber: generateMemberNumber(newMemberForm.role),
+        // Use the new function to create member and user account
+        const result = createMemberWithUser({
             name: newMemberForm.name,
             email: newMemberForm.email,
             phone: newMemberForm.phone,
             role: newMemberForm.role,
-            status: "active",
-            joinDate: new Date().toISOString().split("T")[0],
-            borrowedBooks: 0,
-            overdueBooks: 0,
-            // Add credentials for librarian
-            ...(newMemberForm.role === "librarian" && {
-                username: newMemberForm.username,
-                password: newMemberForm.password
-            })
-        };
+            username: newMemberForm.username,
+            password: newMemberForm.password
+        });
 
-        setMembers([...members, newMember]);
-        setNewMemberForm({ name: "", email: "", phone: "", role: "member" });
-        setShowAddDialog(false);
-        alert("เพิ่มสมาชิกเรียบร้อยแล้ว");
+        if (result.success) {
+            // Update local state with the new member
+            setMembers([...members, result.member!]);
+            setNewMemberForm({ name: "", email: "", phone: "", role: "member" });
+            setShowAddDialog(false);
+
+            const userMessage = result.user
+                ? `เพิ่มสมาชิกและบัญชีผู้ใช้เรียบร้อยแล้ว\nUsername: ${result.user.username}`
+                : "เพิ่มสมาชิกเรียบร้อยแล้ว";
+
+            alert(userMessage);
+        } else {
+            alert(result.error || "เกิดข้อผิดพลาดในการเพิ่มสมาชิก");
+        }
     };
 
     const handleToggleStatus = (memberId: string) => {
-        setMembers(members.map(member =>
+        const updatedMembers = members.map(member =>
             member.id === memberId
-                ? { ...member, status: member.status === "active" ? "inactive" : "active" }
+                ? { ...member, status: (member.status === "active" ? "inactive" : "active") as "active" | "inactive" }
                 : member
-        ));
+        );
+
+        setMembers(updatedMembers);
+
+        // Update original mock data
+        const memberIndex = mockMembers.findIndex(m => m.id === memberId);
+        if (memberIndex !== -1) {
+            const updatedMember = updatedMembers.find(m => m.id === memberId);
+            if (updatedMember) {
+                mockMembers[memberIndex] = updatedMember;
+            }
+        }
     };
 
     const handleDeleteMember = (memberId: string) => {
         if (window.confirm("คุณต้องการลบสมาชิกนี้หรือไม่?")) {
-            setMembers(members.filter(member => member.id !== memberId));
-        }
-    };
+            const updatedMembers = members.filter(member => member.id !== memberId);
+            setMembers(updatedMembers);
 
-    // Handle opening edit dialog with selected member
+            // Update original mock data
+            const memberIndex = mockMembers.findIndex(m => m.id === memberId);
+            if (memberIndex !== -1) {
+                mockMembers.splice(memberIndex, 1);
+            }
+        }
+    };    // Handle opening edit dialog with selected member
     const handleEditMember = (member: Member) => {
         setSelectedMember(member);
         setShowEditDialog(true);
@@ -178,31 +201,37 @@ export default function MemberManagementPage() {
                 };
             }
 
-            // Update the member in the members array
-            const updatedMembers = members.map(member =>
-                member.id === updatedMember.id
-                    ? {
-                        ...member,
-                        name: updatedMember.name,
-                        email: updatedMember.email,
-                        phone: updatedMember.phone,
-                        // Keep other fields unchanged as they are read-only in edit mode
-                    }
-                    : member
-            );
+            // Use the new function to update member and user account
+            const result = updateMemberWithUser(updatedMember.id, {
+                name: updatedMember.name,
+                email: updatedMember.email,
+                phone: updatedMember.phone
+            });
 
-            setMembers(updatedMembers);
-            setShowEditDialog(false);
-            setSelectedMember(null);
-            setSuccessMessage("อัพเดทข้อมูลสมาชิกเรียบร้อยแล้ว");
-            setErrorMessage("");
+            if (result.success) {
+                // Update local state
+                const updatedMembers = members.map(member =>
+                    member.id === updatedMember.id ? result.member! : member
+                );
 
-            // Clear success message after 5 seconds
-            setTimeout(() => {
-                setSuccessMessage("");
-            }, 5000);
+                setMembers(updatedMembers);
+                setShowEditDialog(false);
+                setSelectedMember(null);
+                setSuccessMessage("อัพเดทข้อมูลสมาชิกและบัญชีผู้ใช้เรียบร้อยแล้ว");
+                setErrorMessage("");
 
-            return { success: true };
+                // Clear success message after 5 seconds
+                setTimeout(() => {
+                    setSuccessMessage("");
+                }, 5000);
+
+                return { success: true };
+            } else {
+                return {
+                    success: false,
+                    message: result.error || 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล'
+                };
+            }
         } catch (error) {
             console.error("Error updating member:", error);
             return {
@@ -232,10 +261,11 @@ export default function MemberManagementPage() {
                     {/* Header */}
                     <div className="flex justify-between items-center">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">จัดการสมาชิก</h1>
+                            <h1 className="text-2xl font-bold text-gray-900">{t("page.members.title")}</h1>
                             <p className="text-gray-600">
-                                จำนวนสมาชิกทั้งหมด {members.length} คน
-                                (ใช้งาน {members.filter(m => m.status === "active").length} คน)
+                                {t("page.members.subtitle")
+                                    .replace("{count}", members.length.toString())
+                                    .replace("{active}", members.filter(m => m.status === "active").length.toString())}
                             </p>
                         </div>
                         <button
@@ -245,7 +275,7 @@ export default function MemberManagementPage() {
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            เพิ่มสมาชิกใหม่
+                            {t("button.add.member")}
                         </button>
                     </div>
 

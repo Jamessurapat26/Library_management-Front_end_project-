@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import BookEditDialog from "./BookEditDialog";
 
 interface BookCopy {
     copyId: string;
@@ -31,12 +32,25 @@ interface BookListProps {
     onBorrow?: (bookId: string) => void;
     onDelete?: (bookId: string) => void;
     onReturn?: (bookId: string) => void;
+    onEdit?: (bookId: string, updatedBook: any) => Promise<{ success: boolean; message?: string }>;
     sidebarCollapsed?: boolean;
 }
 
-function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId: string) => void; onDelete?: (bookId: string) => void; onReturn?: (bookId: string) => void }) {
+function BookCard({
+    book,
+    onBorrow,
+    onDelete,
+    onEdit
+}: {
+    book: Book;
+    onBorrow?: (bookId: string) => void;
+    onDelete?: (bookId: string) => void;
+    onReturn?: (bookId: string) => void;
+    onEdit?: (bookId: string, updatedBook: any) => Promise<{ success: boolean; message?: string }>;
+}) {
     const router = useRouter();
     const [showMenu, setShowMenu] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -65,8 +79,15 @@ function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId
     const canDelete = borrowedCopies === 0; // Can only delete if no borrowed copies
 
     const handleEdit = () => {
-        router.push(`/admin/books/${book.id}/edit`);
+        setShowEditDialog(true);
         setShowMenu(false);
+    };
+
+    const handleEditBook = async (bookId: string, updatedBook: any) => {
+        if (onEdit) {
+            return await onEdit(bookId, updatedBook);
+        }
+        return { success: false, message: 'ฟังก์ชันแก้ไขไม่พร้อมใช้งาน' };
     };
 
     const handleDelete = () => {
@@ -203,6 +224,14 @@ function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId
                     </div>
                 </div>
             </div>
+
+            {/* Edit Dialog */}
+            <BookEditDialog
+                isOpen={showEditDialog}
+                onClose={() => setShowEditDialog(false)}
+                onUpdateBook={handleEditBook}
+                book={book}
+            />
         </div>
     );
 } function LoadingSkeleton() {
@@ -235,7 +264,7 @@ function BookCard({ book, onBorrow, onDelete }: { book: Book; onBorrow?: (bookId
     );
 }
 
-export default function BookList({ books, loading = false, onBorrow, onDelete, sidebarCollapsed = false }: BookListProps) {
+export default function BookList({ books, loading = false, onBorrow, onDelete, onEdit, sidebarCollapsed = false }: BookListProps) {
     // Dynamic grid classes based on sidebar state
     const gridClasses = sidebarCollapsed
         ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
@@ -271,6 +300,7 @@ export default function BookList({ books, loading = false, onBorrow, onDelete, s
                     book={book}
                     onBorrow={onBorrow}
                     onDelete={onDelete}
+                    onEdit={onEdit}
                 />
             ))}
         </div>

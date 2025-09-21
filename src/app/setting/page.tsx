@@ -1,137 +1,74 @@
 'use client';
 
-import { DashboardLayout } from "@/components/Layout";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { useState, useEffect } from "react";
-import { mockMembers, Member } from "@/mock/members";
-import {
-    ProfileTab,
-    SecurityTab,
-    NotificationsTab,
-    SystemTab,
-    SettingsSidebar
-} from "@/app/setting/components";
-
-// Define types for the settings
-interface ProfileData {
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    position: string;
-    department: string;
-    memberNumber: string;
-    joinDate: string;
-    status: string;
-}
-
-interface PasswordData {
-    currentPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-}
-
-interface NotificationSettings {
-    emailNotifications: boolean;
-    overdueReminders: boolean;
-    newBookAlerts: boolean;
-    systemUpdates: boolean;
-}
+import React from 'react';
+import { DashboardLayout } from '@/components/Layout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { useLanguage } from '../../hooks/useLanguage';
+import { LanguageToggle, SettingSection } from './components';
 
 export default function SettingPage() {
-    const [activeTab, setActiveTab] = useState('profile');
-    const [currentUser, setCurrentUser] = useState<Member | null>(null);
+    const { t, isLoading: languageLoading, error: languageError } = useLanguage();
 
-    // Initialize user data from mock data (assuming current user is admin)
-    useEffect(() => {
-        const adminUser = mockMembers.find(member => member.role === 'admin');
-        if (adminUser) {
-            setCurrentUser(adminUser);
-        }
-    }, []);
-
-    const handleProfileUpdate = (profileData: ProfileData) => {
-        // Update current user state
-        if (currentUser) {
-            const updatedUser: Member = {
-                ...currentUser,
-                name: `${profileData.firstName} ${profileData.lastName}`,
-                email: profileData.email,
-                phone: profileData.phone,
-                status: profileData.status as "active" | "inactive",
-                username: profileData.username
-            };
-            setCurrentUser(updatedUser);
-
-            // In a real application, you would send this data to a backend API
-            console.log('Profile updated:', updatedUser);
-        }
-
-        alert(`ข้อมูลโปรไฟล์ถูกอัปเดตเรียบร้อยแล้ว\n\nรายละเอียดที่อัปเดต:\n• ชื่อ: ${profileData.firstName} ${profileData.lastName}\n• อีเมล: ${profileData.email}\n• โทรศัพท์: ${profileData.phone}\n• สถานะ: ${profileData.status === 'active' ? 'ใช้งานได้' : 'ไม่ใช้งาน'}`);
-    };
-
-    const handlePasswordChange = (passwordData: PasswordData) => {
-        console.log('Password changed:', passwordData);
-        // Handle password change logic here
-        alert('รหัสผ่านถูกเปลี่ยนเรียบร้อยแล้ว');
-    };
-
-    const handleNotificationSave = (notifications: NotificationSettings) => {
-        console.log('Notifications updated:', notifications);
-        alert('การตั้งค่าการแจ้งเตือนถูกบันทึกแล้ว');
-    };
-
-    const handleSystemSave = () => {
-        console.log('System settings updated');
-        alert('การตั้งค่าระบบถูกบันทึกแล้ว');
-    };
+    const isLoading = languageLoading;
+    const hasError = languageError;
 
     return (
         <ProtectedRoute>
             <DashboardLayout>
-                <div className="max-w-6xl mx-auto">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">การตั้งค่า</h1>
-                        <p className="text-gray-600">จัดการข้อมูลส่วนตัวและการตั้งค่าระบบ</p>
+                <div className="space-y-6">
+                    {/* Page Header */}
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            {t('settings.title')}
+                        </h1>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            {t('settings.preferences')}
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                        {/* Sidebar */}
-                        <div className="lg:col-span-1">
-                            <SettingsSidebar
-                                activeTab={activeTab}
-                                onTabChange={setActiveTab}
-                            />
+                    {/* Loading State */}
+                    {isLoading && (
+                        <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                            <span className="ml-3 text-gray-300">
+                                {t('common.loading')}
+                            </span>
                         </div>
+                    )}
 
-                        {/* Main Content */}
-                        <div className="lg:col-span-3">
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                                {activeTab === 'profile' && (
-                                    <ProfileTab
-                                        currentUser={currentUser}
-                                        onProfileUpdate={handleProfileUpdate}
-                                    />
-                                )}
-
-                                {activeTab === 'security' && (
-                                    <SecurityTab onPasswordChange={handlePasswordChange} />
-                                )}
-
-                                {activeTab === 'notifications' && (
-                                    <NotificationsTab onNotificationSave={handleNotificationSave} />
-                                )}
-
-                                {activeTab === 'system' && (
-                                    <SystemTab onSystemSave={handleSystemSave} />
-                                )}
+                    {/* Error State */}
+                    {hasError && !isLoading && (
+                        <div className="p-4 bg-red-900/20 border border-red-700/50 rounded-lg">
+                            <div className="flex">
+                                <svg className="w-5 h-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                                <div className="ml-3">
+                                    <h3 className="text-sm font-medium text-red-300">
+                                        {t('error.settings.load')}
+                                    </h3>
+                                    <div className="mt-2 text-sm text-red-400">
+                                        {languageError && <p>{languageError}</p>}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
+
+                    {/* Settings Content */}
+                    {!isLoading && (
+                        <div className="max-w-2xl space-y-6">
+                            {/* Language Settings Section */}
+                            <SettingSection
+                                title={t('settings.language')}
+                                description={t('settings.language.description')}
+                            >
+                                <LanguageToggle />
+                            </SettingSection>
+                        </div>
+                    )}
                 </div>
             </DashboardLayout>
         </ProtectedRoute>
-    )
+    );
 }

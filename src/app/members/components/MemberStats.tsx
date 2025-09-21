@@ -1,14 +1,53 @@
-import { Member } from "@/mock/members";
+'use client';
+
+import { useState, useEffect } from "react";
+import { Member, mockMembers } from "@/mock/members";
 
 interface MemberStatsProps {
     members: Member[];
 }
 
 export default function MemberStats({ members }: MemberStatsProps) {
-    const adminCount = members.filter(m => m.role === "admin").length;
-    const librarianCount = members.filter(m => m.role === "librarian").length;
-    const memberCount = members.filter(m => m.role === "member").length;
-    const activeCount = members.filter(m => m.status === "active").length;
+    const [realTimeStats, setRealTimeStats] = useState({
+        adminCount: 0,
+        librarianCount: 0,
+        memberCount: 0,
+        activeCount: 0
+    });
+
+    // Calculate stats from real-time data
+    const calculateStats = () => {
+        const adminCount = mockMembers.filter(m => m.role === "admin").length;
+        const librarianCount = mockMembers.filter(m => m.role === "librarian").length;
+        const memberCount = mockMembers.filter(m => m.role === "member").length;
+        const activeCount = mockMembers.filter(m => m.status === "active").length;
+
+        return { adminCount, librarianCount, memberCount, activeCount };
+    };
+
+    // Update stats in real-time
+    useEffect(() => {
+        const updateStats = () => {
+            setRealTimeStats(calculateStats());
+        };
+
+        // Initial calculation
+        updateStats();
+
+        // Set up interval for real-time updates (every 3 seconds)
+        const interval = setInterval(updateStats, 3000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(interval);
+    }, []);
+
+    // Use props data as fallback but prefer real-time data
+    const stats = {
+        adminCount: realTimeStats.adminCount || members.filter(m => m.role === "admin").length,
+        librarianCount: realTimeStats.librarianCount || members.filter(m => m.role === "librarian").length,
+        memberCount: realTimeStats.memberCount || members.filter(m => m.role === "member").length,
+        activeCount: realTimeStats.activeCount || members.filter(m => m.status === "active").length
+    };
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -21,7 +60,7 @@ export default function MemberStats({ members }: MemberStatsProps) {
                     </div>
                     <div className="ml-4">
                         <p className="text-sm text-gray-600">ผู้ดูแลระบบ</p>
-                        <p className="text-2xl font-bold text-gray-900">{adminCount}</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.adminCount}</p>
                     </div>
                 </div>
             </div>
@@ -34,7 +73,7 @@ export default function MemberStats({ members }: MemberStatsProps) {
                     </div>
                     <div className="ml-4">
                         <p className="text-sm text-gray-600">บรรณารักษ์</p>
-                        <p className="text-2xl font-bold text-gray-900">{librarianCount}</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.librarianCount}</p>
                     </div>
                 </div>
             </div>
@@ -47,7 +86,7 @@ export default function MemberStats({ members }: MemberStatsProps) {
                     </div>
                     <div className="ml-4">
                         <p className="text-sm text-gray-600">สมาชิก</p>
-                        <p className="text-2xl font-bold text-gray-900">{memberCount}</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.memberCount}</p>
                     </div>
                 </div>
             </div>
@@ -60,7 +99,7 @@ export default function MemberStats({ members }: MemberStatsProps) {
                     </div>
                     <div className="ml-4">
                         <p className="text-sm text-gray-600">ใช้งาน</p>
-                        <p className="text-2xl font-bold text-gray-900">{activeCount}</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.activeCount}</p>
                     </div>
                 </div>
             </div>

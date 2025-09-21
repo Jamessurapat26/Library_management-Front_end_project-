@@ -1,12 +1,13 @@
 "use client";
 
 import { ReactNode } from "react";
-import Sidebar, { SidebarItem, adminSidebarItems, librarianSidebarItems, memberSidebarItems } from "./Sidebar";
+import Sidebar, { SidebarItem, getAdminSidebarItems, getLibrarianSidebarItems, getMemberSidebarItems } from "./Sidebar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { SessionStatus } from "./SessionStatus";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface LayoutProps {
     children: ReactNode;
@@ -76,24 +77,25 @@ interface DashboardLayoutProps extends Omit<LayoutProps, 'sidebarItems' | 'usern
 
 export function DashboardLayout({ userType, ...props }: DashboardLayoutProps) {
     const { user } = useAuth();
+    const { t } = useLanguage();
 
     // Use authentication context data if available, fallback to userType prop
     const currentUserType = user?.role || userType || 'admin';
     const currentUsername = user?.displayName || user?.username || 'User';
-    const currentUserRole = user ? getRoleDisplayName(user.role) : (
-        currentUserType === 'admin' ? 'ผู้ดูแลระบบ' :
-            currentUserType === 'librarian' ? 'บรรณารักษ์' : 'สมาชิก'
+    const currentUserRole = user ? getRoleDisplayName(user.role, t) : (
+        currentUserType === 'admin' ? t('role.admin') :
+            currentUserType === 'librarian' ? t('role.librarian') : t('role.member')
     );
 
     // Import sidebar items based on user type
     const getSidebarItems = () => {
         switch (currentUserType) {
             case 'admin':
-                return adminSidebarItems;
+                return getAdminSidebarItems(t);
             case 'librarian':
-                return librarianSidebarItems;
+                return getLibrarianSidebarItems(t);
             case 'member':
-                return memberSidebarItems;
+                return getMemberSidebarItems(t);
             default:
                 return [];
         }
@@ -109,13 +111,15 @@ export function DashboardLayout({ userType, ...props }: DashboardLayoutProps) {
     );
 }
 
-// Helper function to get Thai display names for roles
-function getRoleDisplayName(role: string): string {
+// Helper function to get display names for roles
+function getRoleDisplayName(role: string, t: (key: string) => string): string {
     switch (role) {
         case 'admin':
-            return 'ผู้ดูแลระบบ';
+            return t('role.admin');
         case 'librarian':
-            return 'บรรณารักษ์';
+            return t('role.librarian');
+        case 'member':
+            return t('role.member');
         default:
             return role;
     }

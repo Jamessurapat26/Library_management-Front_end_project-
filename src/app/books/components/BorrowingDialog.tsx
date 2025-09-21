@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { mockMembers, Member } from '@/mock/members';
+import { mockTransactions, Transaction } from '@/mock/transactions';
 import { X, User, Calendar, Clock, BookOpen, Search, CheckCircle } from 'lucide-react';
 
 interface BorrowForm {
@@ -17,6 +18,8 @@ interface BorrowingDialogProps {
     onClose: () => void;
     onConfirm: (borrowForm: BorrowForm) => void;
     bookTitle: string;
+    bookId: string;
+    bookIsbn: string;
     availableCopies: number;
 }
 
@@ -25,6 +28,8 @@ export default function BorrowingDialog({
     onClose,
     onConfirm,
     bookTitle,
+    bookId,
+    bookIsbn,
     availableCopies,
 }: BorrowingDialogProps) {
     const [borrowForm, setBorrowForm] = useState<BorrowForm>({
@@ -143,6 +148,33 @@ export default function BorrowingDialog({
         try {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Create new transaction
+            const newTransaction: Transaction = {
+                id: `TXN${String(mockTransactions.length + 1).padStart(3, '0')}`,
+                type: 'borrow',
+                bookId: bookId,
+                bookTitle: bookTitle,
+                bookIsbn: bookIsbn,
+                memberId: selectedMember.id,
+                memberName: selectedMember.name,
+                memberNumber: selectedMember.memberNumber,
+                borrowDate: new Date().toISOString().split('T')[0],
+                dueDate: borrowForm.dueDate,
+                status: 'active',
+                librianId: 'LIB001', // You might want to get this from auth context
+                librarianName: 'บรรณารักษ์ ปัจจุบัน', // You might want to get this from auth context
+                notes: borrowForm.notes || undefined
+            };
+
+            // Add to mock transactions
+            mockTransactions.push(newTransaction);
+
+            // Update member's borrowed books count
+            selectedMember.borrowedBooks += 1;
+
+            console.log('New transaction added:', newTransaction);
+
             onConfirm(borrowForm);
         } catch (error) {
             console.error('Error confirming borrow:', error);

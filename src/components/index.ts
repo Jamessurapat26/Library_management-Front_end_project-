@@ -7,3 +7,6 @@ export { default as Footer } from './Footer';
 // Authentication components
 export { ProtectedRoute, LoadingSpinner, AccessDenied, SessionError } from './ProtectedRoute';
 export { SessionStatus, useSessionStatus } from './SessionStatus';
+
+// UI components
+export { Toast } from './Toast';

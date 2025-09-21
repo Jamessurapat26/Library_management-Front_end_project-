@@ -15,8 +15,10 @@ import {
     MembersReport,
     TransactionsReport
 } from './components';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function ReportsPage() {
+    const { t } = useLanguage();
     const [books] = useState(mockBooks);
     const [members] = useState(mockMembers);
     const [transactions] = useState(mockTransactions);
@@ -64,10 +66,10 @@ export default function ReportsPage() {
     }, {} as Record<string, { total: number, available: number, borrowed: number }>);
 
     const reportTypes = [
-        { id: 'overview', name: 'ภาพรวม', icon: '📊' },
-        { id: 'books', name: 'รายงานหนังสือ', icon: '📚' },
-        { id: 'members', name: 'รายงานสมาชิก', icon: '👥' },
-        { id: 'transactions', name: 'รายงานการยืม-คืน', icon: '🔄' },
+        { id: 'overview', name: t('reports.overview'), icon: '📊' },
+        { id: 'books', name: t('reports.books'), icon: '📚' },
+        { id: 'members', name: t('reports.members'), icon: '👥' },
+        { id: 'transactions', name: t('reports.transactions'), icon: '🔄' },
     ];
 
     return (
@@ -76,8 +78,8 @@ export default function ReportsPage() {
                 <div className="p-6 space-y-6">
                     {/* Header */}
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">รายงาน</h1>
-                        <p className="text-gray-600">รายงานสถิติและข้อมูลของระบบห้องสมุด</p>
+                        <h1 className="text-2xl font-bold text-gray-900">{t("page.reports.title")}</h1>
+                        <p className="text-gray-600">{t("page.reports.subtitle")}</p>
                     </div>
 
                     {/* Report Type Selector */}

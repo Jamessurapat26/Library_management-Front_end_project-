@@ -15,6 +15,8 @@ export {
     type UseMemberFormValidationReturn,
     type UseMemberEditValidationOptions
 } from './useMemberFormValidation';
+export { useTheme } from './useTheme';
+export { useLanguage } from './useLanguage';
 
 // You can add more hooks here in the future
 // export { useApi } from './useApi';

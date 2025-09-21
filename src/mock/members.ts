@@ -24,7 +24,9 @@ export const mockMembers: Member[] = [
         status: "active",
         joinDate: "2023-01-01",
         borrowedBooks: 0,
-        overdueBooks: 0
+        overdueBooks: 0,
+        username: "admin",
+        password: "password"
     },
     {
         id: "2",
