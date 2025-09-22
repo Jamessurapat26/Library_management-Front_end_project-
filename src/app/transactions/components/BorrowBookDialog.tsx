@@ -278,27 +278,29 @@ export default function BorrowBookDialog({ isOpen, onClose, onSubmit }: BorrowBo
                 </div>
 
                 {/* Footer */}
-                <div className="flex flex-col sm:flex-row gap-3 p-6 border-t border-gray-200">
-                    <button
-                        type="button"
-                        onClick={handleClose}
-                        className="flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                    >
-                        <X className="w-4 h-4 mr-2" />
-                        ยกเลิก
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={!borrowData.bookId || !borrowData.memberId}
-                        className={`flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors ${!borrowData.bookId || !borrowData.memberId
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl'
-                            }`}
-                    >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        ยืนยันการยืม
-                    </button>
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="flex flex-col sm:flex-row gap-3 p-6 border-t border-gray-200">
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                        >
+                            <X className="w-4 h-4 mr-2" />
+                            ยกเลิก
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={!borrowData.bookId || !borrowData.memberId}
+                            className={`flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors ${!borrowData.bookId || !borrowData.memberId
+                                ? 'bg-gray-400 text-white cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl'
+                                }`}
+                        >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            ยืนยันการยืม
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );
