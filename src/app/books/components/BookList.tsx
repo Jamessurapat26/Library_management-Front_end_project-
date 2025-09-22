@@ -26,13 +26,24 @@ export interface Book {
     description?: string;
 }
 
+interface BookEditForm {
+    title: string;
+    isbn: string;
+    author: string;
+    publisher: string;
+    publishYear: number;
+    category: string;
+    description?: string;
+    totalCopies: number;
+}
+
 interface BookListProps {
     books: Book[];
     loading?: boolean;
     onBorrow?: (bookId: string) => void;
     onDelete?: (bookId: string) => void;
     onReturn?: (bookId: string) => void;
-    onEdit?: (bookId: string, updatedBook: any) => Promise<{ success: boolean; message?: string }>;
+    onEdit?: (bookId: string, updatedBook: BookEditForm) => Promise<{ success: boolean; message?: string }>;
     sidebarCollapsed?: boolean;
 }
 
@@ -46,7 +57,7 @@ function BookCard({
     onBorrow?: (bookId: string) => void;
     onDelete?: (bookId: string) => void;
     onReturn?: (bookId: string) => void;
-    onEdit?: (bookId: string, updatedBook: any) => Promise<{ success: boolean; message?: string }>;
+    onEdit?: (bookId: string, updatedBook: BookEditForm) => Promise<{ success: boolean; message?: string }>;
 }) {
     const router = useRouter();
     const [showMenu, setShowMenu] = useState(false);
@@ -83,7 +94,7 @@ function BookCard({
         setShowMenu(false);
     };
 
-    const handleEditBook = async (bookId: string, updatedBook: any) => {
+    const handleEditBook = async (bookId: string, updatedBook: BookEditForm) => {
         if (onEdit) {
             return await onEdit(bookId, updatedBook);
         }

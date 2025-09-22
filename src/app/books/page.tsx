@@ -8,6 +8,18 @@ import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SearchAndFilter, BookList, Pagination, BookFilters, BorrowingDialog, BorrowForm } from "./components";
 
+interface BookEditForm {
+    title: string;
+    isbn: string;
+    author: string;
+    publisher: string;
+    publishYear: number;
+    category: string;
+    description?: string;
+    totalCopies: number;
+}
+
+
 export default function BooksPage() {
     const { isCollapsed } = useSidebarCollapse(false);
     const { t } = useLanguage();
@@ -276,7 +288,7 @@ export default function BooksPage() {
         }
     };
 
-    const handleEdit = async (bookId: string, updatedBookData: any): Promise<{ success: boolean; message?: string }> => {
+    const handleEdit = async (bookId: string, updatedBookData: BookEditForm): Promise<{ success: boolean; message?: string }> => {
         try {
             // Find the book in mock data
             const bookIndex = mockBooks.findIndex(book => book.id === bookId);

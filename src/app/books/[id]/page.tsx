@@ -29,6 +29,25 @@ interface Book {
     description?: string;
 }
 
+interface BorrowForm {
+    borrowerIdentifier: string; // username or phone
+    borrowerName: string; // actual name from member data
+    borrowDays: number;
+    dueDate: string;
+    notes?: string;
+}
+
+interface BookEditForm {
+    title: string;
+    isbn: string;
+    author: string;
+    publisher: string;
+    publishYear: number;
+    category: string;
+    description?: string;
+    totalCopies: number;
+}
+
 export default function BookDetailPage() {
     const router = useRouter();
     const params = useParams();
@@ -66,8 +85,36 @@ export default function BookDetailPage() {
     };
 
     const handleReturnBook = (copyId: string) => {
-        // TODO: Implement return functionality
-        alert(`ขณะนี้ระบบการคืนหนังสือยังไม่เปิดใช้งาน (รหัสเล่ม: ${copyId})`);
+        try {
+            if (!book) return;
+
+            // Find the copy to return
+            const copyToReturn = book.copies.find(copy => copy.copyId === copyId);
+            if (!copyToReturn || copyToReturn.status !== "borrowed") {
+                alert("ไม่พบเล่มที่ต้องการคืนหรือเล่มนี้ไม่ได้ถูกยืม");
+                return;
+            }
+
+            if (window.confirm(`คุณต้องการคืนหนังสือรหัสเล่ม ${copyId} หรือไม่?`)) {
+                // Update the copy status
+                copyToReturn.status = "available";
+                copyToReturn.borrowedBy = undefined;
+                copyToReturn.dueDate = undefined;
+
+                // Update mockBooks
+                const bookIndex = mockBooks.findIndex(b => b.id === book.id);
+                if (bookIndex !== -1) {
+                    mockBooks[bookIndex] = { ...book };
+                }
+
+                // Update local state to reflect changes immediately
+                setBook({ ...book });
+
+                alert(`คืนหนังสือสำเร็จ\nรหัสเล่ม: ${copyId}`);
+            }
+        } catch (error) {
+            alert("เกิดข้อผิดพลาดในการคืนหนังสือ");
+        }
     };
 
     const handleEditBook = () => {
@@ -76,11 +123,35 @@ export default function BookDetailPage() {
     };
 
     // Add handler for edit dialog confirm
-    const handleUpdateBook = async (bookId: string, updatedBook: any) => {
-        // TODO: Implement update logic here
-        setShowEditDialog(false);
-        alert("อัพเดทข้อมูล: " + JSON.stringify(updatedBook));
-        return { success: true };
+    const handleUpdateBook = async (bookId: string, updatedBook: BookEditForm) => {
+        try {
+            // Update the book in mockBooks
+            const bookIndex = mockBooks.findIndex(b => b.id === bookId);
+            if (bookIndex !== -1) {
+                // Update the book data
+                mockBooks[bookIndex] = {
+                    ...mockBooks[bookIndex],
+                    title: updatedBook.title,
+                    isbn: updatedBook.isbn,
+                    author: updatedBook.author,
+                    publisher: updatedBook.publisher,
+                    publishYear: updatedBook.publishYear,
+                    category: updatedBook.category,
+                    description: updatedBook.description,
+                    totalCopies: updatedBook.totalCopies
+                };
+
+                // Update local state to reflect changes immediately
+                setBook(mockBooks[bookIndex]);
+            }
+
+            setShowEditDialog(false);
+            alert("อัพเดทข้อมูลหนังสือสำเร็จ");
+            return { success: true };
+        } catch (error) {
+            alert("เกิดข้อผิดพลาดในการอัพเดทข้อมูล");
+            return { success: false };
+        }
     };
 
     const handleDeleteBook = () => {
@@ -102,10 +173,36 @@ export default function BookDetailPage() {
     };
 
     // Add handler for dialog confirm
-    const handleBorrowConfirm = (borrowForm: any) => {
-        // TODO: Implement borrow logic here
-        setShowBorrowDialog(false);
-        alert("ยืนยันการยืม: " + JSON.stringify(borrowForm));
+    const handleBorrowConfirm = (borrowForm: BorrowForm) => {
+        try {
+            if (!book) return;
+
+            // Find the first available copy
+            const availableCopy = book.copies.find(copy => copy.status === "available");
+            if (!availableCopy) {
+                alert("ไม่มีเล่มว่างให้ยืม");
+                return;
+            }
+
+            // Update the copy status
+            availableCopy.status = "borrowed";
+            availableCopy.borrowedBy = borrowForm.borrowerName;
+            availableCopy.dueDate = borrowForm.dueDate;
+
+            // Update mockBooks
+            const bookIndex = mockBooks.findIndex(b => b.id === book.id);
+            if (bookIndex !== -1) {
+                mockBooks[bookIndex] = { ...book };
+            }
+
+            // Update local state to reflect changes immediately
+            setBook({ ...book });
+
+            setShowBorrowDialog(false);
+            alert(`ยืมหนังสือสำเร็จ\nรหัสเล่ม: ${availableCopy.copyId}\nผู้ยืม: ${borrowForm.borrowerName}\nกำหนดคืน: ${borrowForm.dueDate}`);
+        } catch (error) {
+            alert("เกิดข้อผิดพลาดในการยืมหนังสือ");
+        }
     };
 
     if (!book) {
