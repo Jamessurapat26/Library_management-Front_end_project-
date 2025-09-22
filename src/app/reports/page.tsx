@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/Layout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { mockBooks } from '@/mock/books';
@@ -19,10 +19,17 @@ import { useLanguage } from '@/hooks/useLanguage';
 
 export default function ReportsPage() {
     const { t } = useLanguage();
-    const [books] = useState(mockBooks);
-    const [members] = useState(mockMembers);
-    const [transactions] = useState(mockTransactions);
+    const [books, setBooks] = useState(mockBooks);
+    const [members, setMembers] = useState(mockMembers);
+    const [transactions, setTransactions] = useState(mockTransactions);
     const [selectedReport, setSelectedReport] = useState('overview');
+
+    // Reload mock data on report type change (simulate real-time data)
+    useEffect(() => {
+        setBooks([...mockBooks]);
+        setMembers([...mockMembers]);
+        setTransactions([...mockTransactions]);
+    }, [selectedReport]);
 
     // Calculate statistics
     const stats = {

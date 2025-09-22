@@ -6,7 +6,8 @@ import { DashboardLayout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { mockBooks } from "@/mock";
 import Image from "next/image";
-
+import BorrowingDialog from "../components/BorrowingDialog";
+import BookEditDialog from "../components/BookEditDialog";
 interface BookCopy {
     copyId: string;
     status: "available" | "borrowed";
@@ -35,6 +36,8 @@ export default function BookDetailPage() {
 
     const [book, setBook] = useState<Book | null>(null);
     const [activeTab, setActiveTab] = useState<"overview" | "history">("overview");
+    const [showBorrowDialog, setShowBorrowDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
 
     useEffect(() => {
         // Find book from mock data
@@ -59,8 +62,7 @@ export default function BookDetailPage() {
 
     const handleBorrowBook = () => {
         if (!book || getAvailableCopies() === 0) return;
-        // TODO: Implement borrow functionality
-        alert("ขณะนี้ระบบการยืมหนังสือยังไม่เปิดใช้งาน");
+        setShowBorrowDialog(true);
     };
 
     const handleReturnBook = (copyId: string) => {
@@ -69,15 +71,41 @@ export default function BookDetailPage() {
     };
 
     const handleEditBook = () => {
-        // TODO: Implement edit functionality
-        alert("ขณะนี้ระบบแก้ไขข้อมูลหนังสือยังไม่เปิดใช้งาน");
+        if (!book) return;
+        setShowEditDialog(true);
+    };
+
+    // Add handler for edit dialog confirm
+    const handleUpdateBook = async (bookId: string, updatedBook: any) => {
+        // TODO: Implement update logic here
+        setShowEditDialog(false);
+        alert("อัพเดทข้อมูล: " + JSON.stringify(updatedBook));
+        return { success: true };
     };
 
     const handleDeleteBook = () => {
-        if (window.confirm('คุณต้องการลบหนังสือเล่มนี้หรือไม่?')) {
-            // TODO: Implement delete functionality
-            alert("ขณะนี้ระบบลบหนังสือยังไม่เปิดใช้งาน");
+        if (!book) return;
+        const borrowedCopies = book.copies.filter(copy => copy.status === "borrowed");
+        if (borrowedCopies.length > 0) {
+            alert(`ไม่สามารถลบหนังสือได้ เนื่องจากมีคนยืมอยู่ ${borrowedCopies.length} เล่ม\n\nกรุณารอให้ผู้ยืมคืนหนังสือก่อน`);
+            return;
         }
+        if (window.confirm('คุณต้องการลบหนังสือเล่มนี้หรือไม่?')) {
+            // Remove book from mockBooks
+            const idx = mockBooks.findIndex(b => b.id === book.id);
+            if (idx !== -1) {
+                mockBooks.splice(idx, 1);
+            }
+            alert("ลบหนังสือสำเร็จ");
+            router.push("/books");
+        }
+    };
+
+    // Add handler for dialog confirm
+    const handleBorrowConfirm = (borrowForm: any) => {
+        // TODO: Implement borrow logic here
+        setShowBorrowDialog(false);
+        alert("ยืนยันการยืม: " + JSON.stringify(borrowForm));
     };
 
     if (!book) {
@@ -385,6 +413,28 @@ export default function BookDetailPage() {
                         )}
                     </div>
                 </div>
+
+                {/* Borrowing Dialog */}
+                {showBorrowDialog && (
+                    <BorrowingDialog
+                        isOpen={showBorrowDialog}
+                        onClose={() => setShowBorrowDialog(false)}
+                        onConfirm={handleBorrowConfirm}
+                        bookTitle={book.title}
+                        bookId={book.id}
+                        bookIsbn={book.isbn}
+                        availableCopies={getAvailableCopies()}
+                    />
+                )}
+                {/* Book Edit Dialog */}
+                {showEditDialog && (
+                    <BookEditDialog
+                        isOpen={showEditDialog}
+                        onClose={() => setShowEditDialog(false)}
+                        onUpdateBook={handleUpdateBook}
+                        book={book}
+                    />
+                )}
             </DashboardLayout>
         </ProtectedRoute>
     );
