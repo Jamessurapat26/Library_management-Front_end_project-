@@ -6,7 +6,7 @@ A front-end library management system built with **Next.js 15**, **React 19**, a
 
 | Layer | Technology |
 |---|---|
-| Framework | [Next.js 15.5](https://nextjs.org) (App Router, Turbopack) |
+| Framework | [Next.js 16.1](https://nextjs.org) (App Router, Turbopack) |
 | UI Library | [React 19](https://react.dev) |
 | Language | [TypeScript 5](https://www.typescriptlang.org) |
 | Styling | [Tailwind CSS 4](https://tailwindcss.com) |
