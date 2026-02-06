@@ -7,17 +7,8 @@ import { mockBooks } from "@/mock";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 import { useLanguage } from "@/hooks/useLanguage";
 import { SearchAndFilter, BookList, Pagination, BookFilters, BorrowingDialog, BorrowForm } from "./components";
-
-interface BookEditForm {
-    title: string;
-    isbn: string;
-    author: string;
-    publisher: string;
-    publishYear: number;
-    category: string;
-    description?: string;
-    totalCopies: number;
-}
+import type { BookEditForm } from "@/types";
+import { LOCALSTORAGE_KEYS, ITEMS_PER_PAGE } from "@/constants";
 
 
 export default function BooksPage() {
@@ -28,7 +19,7 @@ export default function BooksPage() {
     // Listen for localStorage changes to sync across components
     useEffect(() => {
         const handleStorageChange = () => {
-            const savedState = localStorage.getItem('sidebar-collapsed');
+            const savedState = localStorage.getItem(LOCALSTORAGE_KEYS.SIDEBAR);
             if (savedState !== null) {
                 setLocalCollapsed(JSON.parse(savedState));
             }
@@ -75,7 +66,7 @@ export default function BooksPage() {
     } | null>(null);
 
     // Dynamic items per page based on sidebar state
-    const itemsPerPage = localCollapsed ? 12 : 9;
+    const itemsPerPage = localCollapsed ? ITEMS_PER_PAGE.COLLAPSED : ITEMS_PER_PAGE.EXPANDED;
 
     // Filter and search books
     const filteredBooks = useMemo(() => {
@@ -160,11 +151,6 @@ export default function BooksPage() {
     };
 
     const handleBorrowConfirm = (borrowForm: BorrowForm) => {
-        console.log('Borrowing book with details:', {
-            bookId: selectedBookForBorrow?.id,
-            borrowForm
-        });
-
         // Find the book in mock data
         const bookIndex = mockBooks.findIndex(book => book.id === selectedBookForBorrow?.id);
         if (bookIndex === -1) {

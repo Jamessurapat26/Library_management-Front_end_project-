@@ -4,38 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import BookEditDialog from "./BookEditDialog";
+import type { Book, BookEditForm } from "@/types";
 
-interface BookCopy {
-    copyId: string;
-    status: "available" | "borrowed";
-    borrowedBy?: string;
-    dueDate?: string;
-}
-
-export interface Book {
-    id: string;
-    title: string;
-    isbn: string;
-    author: string;
-    publisher: string;
-    publishYear: number;
-    category: string;
-    totalCopies: number;
-    copies: BookCopy[];
-    coverImage?: string;
-    description?: string;
-}
-
-interface BookEditForm {
-    title: string;
-    isbn: string;
-    author: string;
-    publisher: string;
-    publishYear: number;
-    category: string;
-    description?: string;
-    totalCopies: number;
-}
+export type { Book };
 
 interface BookListProps {
     books: Book[];

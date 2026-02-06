@@ -1,5 +1,7 @@
 'use client';
 
+import { TRANSACTION_STATUS_LABELS } from '@/constants';
+
 interface TransactionStatsProps {
     activeTransactions: number;
     overdueTransactions: number;
@@ -15,7 +17,7 @@ export default function TransactionStats({
 }: TransactionStatsProps) {
     const stats = [
         {
-            title: 'กำลังยืม',
+            title: TRANSACTION_STATUS_LABELS.active,
             value: activeTransactions,
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +28,7 @@ export default function TransactionStats({
             textColor: 'text-blue-600'
         },
         {
-            title: 'เกินกำหนด',
+            title: TRANSACTION_STATUS_LABELS.overdue,
             value: overdueTransactions,
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

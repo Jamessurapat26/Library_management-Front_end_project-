@@ -1,13 +1,4 @@
-interface ActivityItem {
-    bookTitle: string;
-    user: string;
-    type: 'borrow' | 'return';
-}
-
-interface PopularBook {
-    title: string;
-    borrowCount: number;
-}
+import type { ActivityItem, PopularBookSummary } from '@/types';
 
 function ActivityCard({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -66,7 +57,7 @@ function RecentBorrowReturns() {
 }
 
 function PopularBooks() {
-    const popularBooks: PopularBook[] = [
+    const popularBooks: PopularBookSummary[] = [
         { title: "แฮร์รี่ พอตเตอร์", borrowCount: 45 },
         { title: "เดอะ ลอร์ด ออฟ เดอะ ริงส์", borrowCount: 38 },
         { title: "อนุสรณ์ในป่าไผ่", borrowCount: 32 }

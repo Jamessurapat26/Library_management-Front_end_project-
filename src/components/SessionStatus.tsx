@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getStoredSession, getSessionRemainingTime, formatSessionTime } from '@/utils/auth';
+import { SESSION_DURATION, POLLING_INTERVAL } from '@/constants';
 
 interface SessionStatusProps {
     showInNavbar?: boolean;
@@ -38,8 +39,7 @@ export function SessionStatus({ showInNavbar = false, className = '' }: SessionS
                 setRemainingTime(remaining);
 
                 // Show warning if less than 10 minutes remaining
-                const tenMinutes = 10 * 60 * 1000;
-                setShowWarning(remaining > 0 && remaining <= tenMinutes);
+                setShowWarning(remaining > 0 && remaining <= SESSION_DURATION.SESSION_STATUS_WARNING);
             }
         };
 
@@ -47,7 +47,7 @@ export function SessionStatus({ showInNavbar = false, className = '' }: SessionS
         updateRemainingTime();
 
         // Update every minute
-        const interval = setInterval(updateRemainingTime, 60 * 1000);
+        const interval = setInterval(updateRemainingTime, POLLING_INTERVAL.SESSION_CHECK);
 
         return () => clearInterval(interval);
     }, [isAuthenticated]);
@@ -130,18 +130,17 @@ export function useSessionStatus() {
             const session = getStoredSession();
             if (session) {
                 const remaining = getSessionRemainingTime(session);
-                const tenMinutes = 10 * 60 * 1000;
 
                 setSessionInfo({
                     remainingTime: remaining,
-                    isExpiringSoon: remaining > 0 && remaining <= tenMinutes,
+                    isExpiringSoon: remaining > 0 && remaining <= SESSION_DURATION.SESSION_STATUS_WARNING,
                     formattedTime: formatSessionTime(remaining)
                 });
             }
         };
 
         updateSessionInfo();
-        const interval = setInterval(updateSessionInfo, 60 * 1000);
+        const interval = setInterval(updateSessionInfo, POLLING_INTERVAL.SESSION_CHECK);
 
         return () => clearInterval(interval);
     }, [isAuthenticated]);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLanguage } from '../../../hooks/useLanguage';
 import { useToast } from '../../../context/ToastContext';
 
@@ -16,7 +16,6 @@ export function LanguageToggle() {
     }, [error, showError, t]);
 
     const handleToggleLanguage = () => {
-        const previousLanguage = language;
         toggleLanguage();
 
         // Show success message after language change

@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { DashboardLayout } from '@/components/Layout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useLanguage } from '../../hooks/useLanguage';

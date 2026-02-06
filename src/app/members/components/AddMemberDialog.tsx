@@ -1,45 +1,11 @@
 import { useRolePermissions, useUserCreationValidation } from '@/hooks/useRolePermissions';
 import { useState } from 'react';
+import type { NewMemberForm, MemberFormErrors } from '@/types';
 
-/**
- * Interface for new member form data
- * Contains all fields required for creating a new member
- */
-export interface NewMemberForm {
-    /** Member's full name */
-    name: string;
-    /** Member's email address */
-    email: string;
-    /** Member's phone number */
-    phone: string;
-    /** Member's role in the system */
-    role: "librarian" | "member";
-    /** Username (required for librarian accounts) */
-    username?: string;
-    /** Password (required for librarian accounts) */
-    password?: string;
-}
+export type { NewMemberForm };
+export type { MemberFormErrors as AddMemberFormErrors };
 
-/**
- * Interface for form validation errors
- * Contains optional error messages for each form field
- */
-export interface AddMemberFormErrors {
-    /** Error message for role field */
-    role?: string;
-    /** General error message not specific to any field */
-    general?: string;
-    /** Error message for name field */
-    name?: string;
-    /** Error message for email field */
-    email?: string;
-    /** Error message for phone field */
-    phone?: string;
-    /** Error message for username field */
-    username?: string;
-    /** Error message for password field */
-    password?: string;
-}
+type AddMemberFormErrors = MemberFormErrors;
 
 /**
  * Props interface for the AddMemberDialog component
@@ -66,7 +32,6 @@ export default function AddMemberDialog({
     onAddMember,
     newMemberForm,
     setNewMemberForm,
-    userRole
 }: AddMemberDialogProps) {
     const permissions = useRolePermissions();
     const { canCreateUser, getAvailableRoles } = useUserCreationValidation();
@@ -74,8 +39,6 @@ export default function AddMemberDialog({
 
     // Current user role is passed as prop for additional context
     // Role permissions are handled by useRolePermissions hook
-    // userRole prop is available for future enhancements or debugging
-    console.log('AddMemberDialog - Current user role:', userRole);
 
     // Clear errors when dialog closes
     const handleClose = () => {

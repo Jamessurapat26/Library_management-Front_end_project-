@@ -25,7 +25,7 @@ export const getUserFromMember = (memberId: string): UserAccount | null => {
  * Get member from user account ID
  */
 export const getMemberFromUser = (userId: string): Member | null => {
-    const memberEntry = Object.entries(MEMBER_USER_MAPPING).find(([_, uId]) => uId === userId);
+    const memberEntry = Object.entries(MEMBER_USER_MAPPING).find(([, uId]) => uId === userId);
     if (memberEntry) {
         const memberId = memberEntry[0];
         return mockMembers.find(member => member.id === memberId) || null;
@@ -154,12 +154,6 @@ export const createMemberWithUser = (memberData: {
             MEMBER_USER_MAPPING[newMemberId] = newUserId;
         }
 
-        console.log('Created new member:', newMember);
-        if (newUser) {
-            console.log('Created new user account:', newUser);
-            console.log('Updated mapping:', MEMBER_USER_MAPPING);
-        }
-
         return {
             success: true,
             member: newMember,
@@ -202,11 +196,6 @@ export const updateMemberWithUser = (memberId: string, updateData: {
                 updatedUser = { ...mockUserAccounts[userIndex], displayName: updateData.name };
                 mockUserAccounts[userIndex] = updatedUser;
             }
-        }
-
-        console.log('Updated member:', updatedMember);
-        if (updatedUser) {
-            console.log('Updated user account:', updatedUser);
         }
 
         return {

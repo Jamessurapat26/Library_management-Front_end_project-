@@ -1,8 +1,10 @@
 'use client';
 
 import { useContext, useCallback, useEffect, useState } from 'react';
-import { AuthContext, type AuthContextType, type User } from '@/context/AuthContext';
+import { AuthContext, type AuthContextType } from '@/context/AuthContext';
+import type { User } from '@/types';
 import { validateSession, getStoredSession, clearStoredSession } from '@/utils/auth';
+import { POLLING_INTERVAL, SESSION_DURATION } from '@/constants';
 
 // Enhanced authentication state interface
 interface UseAuthReturn extends AuthContextType {
@@ -137,7 +139,7 @@ export function useAuth(): UseAuthReturn {
         if (isAuthenticated) {
             const interval = setInterval(() => {
                 refreshSession();
-            }, 5 * 60 * 1000); // 5 minutes
+            }, POLLING_INTERVAL.SESSION_VALIDATE);
 
             return () => clearInterval(interval);
         }
@@ -148,7 +150,7 @@ export function useAuth(): UseAuthReturn {
         if (error) {
             const timeout = setTimeout(() => {
                 setError(null);
-            }, 10000);
+            }, SESSION_DURATION.AUTH_ERROR_CLEAR);
 
             return () => clearTimeout(timeout);
         }

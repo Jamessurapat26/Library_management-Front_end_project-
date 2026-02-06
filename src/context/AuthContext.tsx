@@ -11,22 +11,10 @@ import {
     isSessionExpired,
     getSessionRemainingTime
 } from '@/utils/auth';
+import type { User } from '@/types';
+import { SESSION_DURATION, POLLING_INTERVAL } from '@/constants';
 
-// User interface
-export interface User {
-    id: string;
-    username: string;
-    role: 'admin' | 'librarian';
-    displayName: string;
-}
-
-// User session interface
-export interface UserSession {
-    user: User;
-    timestamp: number;
-    rememberMe: boolean;
-    expiresAt: number;
-}
+export type { User, UserSession } from '@/types';
 
 // Authentication context type
 export interface AuthContextType {
@@ -108,9 +96,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Check if session will expire in the next 5 minutes and warn user
         const remainingTime = getSessionRemainingTime(storedSession);
-        const fiveMinutes = 5 * 60 * 1000;
 
-        if (remainingTime <= fiveMinutes && remainingTime > 0) {
+        if (remainingTime <= SESSION_DURATION.WARNING_THRESHOLD && remainingTime > 0) {
             // Set a timeout to logout when session actually expires
             if (sessionWarningTimeout.current) {
                 clearTimeout(sessionWarningTimeout.current);
@@ -156,7 +143,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Check session every minute
             sessionCheckInterval.current = setInterval(() => {
                 checkSessionExpiration();
-            }, 60 * 1000);
+            }, POLLING_INTERVAL.SESSION_CHECK);
 
             // Initial check
             checkSessionExpiration();

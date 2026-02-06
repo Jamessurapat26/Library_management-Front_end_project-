@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { TRANSACTION_STATUS_LABELS } from '@/constants';
 
 interface TransactionFiltersProps {
     onFilterChange: (filters: TransactionFilters) => void;
@@ -79,9 +80,9 @@ export default function TransactionFilters({ onFilterChange, onSearch }: Transac
                         className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="all">ทั้งหมด</option>
-                        <option value="active">กำลังยืม</option>
-                        <option value="returned">คืนแล้ว</option>
-                        <option value="overdue">เกินกำหนด</option>
+                        <option value="active">{TRANSACTION_STATUS_LABELS.active}</option>
+                        <option value="returned">{TRANSACTION_STATUS_LABELS.returned}</option>
+                        <option value="overdue">{TRANSACTION_STATUS_LABELS.overdue}</option>
                     </select>
                 </div>
 

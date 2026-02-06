@@ -9,23 +9,14 @@ import {
     MemberTable,
     AddMemberDialog,
     EditMemberDialog,
-    type Member,
     type EditMemberForm
 } from "./components";
+import type { Member, NewMemberForm } from "@/types";
 import { mockMembers } from "@/mock";
 import { createMemberWithUser, updateMemberWithUser } from "@/mock/userMemberMapping";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCreationValidation } from "@/hooks/useRolePermissions";
 import { useLanguage } from "@/hooks/useLanguage";
-
-interface NewMemberForm {
-    name: string;
-    email: string;
-    phone: string;
-    role: "librarian" | "member";
-    username?: string;
-    password?: string;
-}
 
 export default function MemberManagementPage() {
     const { user } = useAuth();

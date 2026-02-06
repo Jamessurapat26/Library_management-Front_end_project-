@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect, ReactNode } from 'react';
+import { LOCALSTORAGE_KEYS } from '@/constants';
 
 // Translation type definitions
 type Language = 'th' | 'en';
@@ -182,7 +183,7 @@ const translations = {
 } as const;
 
 // Storage key for language preference
-const LANGUAGE_STORAGE_KEY = 'library-language';
+const LANGUAGE_STORAGE_KEY = LOCALSTORAGE_KEYS.LANGUAGE;
 
 // Create context
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

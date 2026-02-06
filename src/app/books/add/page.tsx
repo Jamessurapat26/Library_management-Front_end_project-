@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/components/Layout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { mockBooks } from '@/mock/books';
 import { ArrowLeft, Save, X, BookOpen } from 'lucide-react';
+import { BOOK_CATEGORIES, BOOK_LANGUAGES } from '@/constants';
 
 interface BookForm {
     title: string;
@@ -51,26 +52,9 @@ export default function AddBookPage() {
     });
     const [errors, setErrors] = useState<BookFormErrors>({});
 
-    const categories = [
-        'คอมพิวเตอร์และเทคโนโลยี',
-        'วิทยาศาสตร์',
-        'คณิตศาสตร์',
-        'ศิลปะและการออกแบบ',
-        'ประวัติศาสตร์',
-        'วรรณกรรม',
-        'จิตวิทยา',
-        'ปรัชญา',
-        'การศึกษา',
-        'ธุรกิจและการเงิน',
-        'การแพทย์และสุขภาพ',
-        'กฎหมาย',
-        'สังคมศาสตร์',
-        'ภาษาศาสตร์',
-        'ศาสนา',
-        'อื่นๆ',
-    ];
+    const categories = BOOK_CATEGORIES;
 
-    const languages = ['ไทย', 'อังกฤษ', 'จีน', 'ญี่ปุ่น', 'เกาหลี', 'ฝรั่งเศส', 'เยอรมัน', 'อื่นๆ'];
+    const languages = BOOK_LANGUAGES;
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -157,7 +141,6 @@ export default function AddBookPage() {
             // Add to mock data (in real app, this would be an API call)
             mockBooks.push(newBook);
 
-            console.log('New book added:', newBook);
             alert('เพิ่มหนังสือสำเร็จ!');
             router.push('/books');
         } catch (error) {

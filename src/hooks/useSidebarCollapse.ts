@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { LOCALSTORAGE_KEYS } from '@/constants';
 
 interface UseSidebarCollapseReturn {
     isCollapsed: boolean;
@@ -14,7 +15,7 @@ export function useSidebarCollapse(defaultCollapsed: boolean = false): UseSideba
     // Load saved state from localStorage on mount
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const savedState = localStorage.getItem('sidebar-collapsed');
+            const savedState = localStorage.getItem(LOCALSTORAGE_KEYS.SIDEBAR);
             if (savedState !== null) {
                 setIsCollapsed(JSON.parse(savedState));
             }
@@ -24,7 +25,7 @@ export function useSidebarCollapse(defaultCollapsed: boolean = false): UseSideba
     // Save state to localStorage whenever it changes
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+            localStorage.setItem(LOCALSTORAGE_KEYS.SIDEBAR, JSON.stringify(isCollapsed));
             // Dispatch custom event to notify other components
             window.dispatchEvent(new CustomEvent('sidebar-toggle'));
         }
@@ -52,7 +53,7 @@ export function useSidebarCollapseSession(defaultCollapsed: boolean = false): Us
     // Load saved state from sessionStorage on mount
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const savedState = sessionStorage.getItem('sidebar-collapsed');
+            const savedState = sessionStorage.getItem(LOCALSTORAGE_KEYS.SIDEBAR);
             if (savedState !== null) {
                 setIsCollapsed(JSON.parse(savedState));
             }
@@ -62,7 +63,7 @@ export function useSidebarCollapseSession(defaultCollapsed: boolean = false): Us
     // Save state to sessionStorage whenever it changes
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            sessionStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+            sessionStorage.setItem(LOCALSTORAGE_KEYS.SIDEBAR, JSON.stringify(isCollapsed));
         }
     }, [isCollapsed]);
 

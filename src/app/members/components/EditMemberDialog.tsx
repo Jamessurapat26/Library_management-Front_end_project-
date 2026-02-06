@@ -1,33 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Member } from '@/mock/members';
+import type { Member, EditMemberForm } from '@/types';
+import { getRoleDisplayName, MEMBER_STATUS_LABELS } from '@/constants';
 import { useMemberEditValidation } from '@/hooks/useMemberFormValidation';
 
-/**
- * Form interface for editing member data
- * Contains all member fields with read-only indicators for non-editable fields
- */
-export interface EditMemberForm {
-    /** Unique identifier for the member */
-    id: string;
-    /** Member number - read-only field that cannot be modified */
-    memberNumber: string;
-    /** Member's full name - editable field */
-    name: string;
-    /** Member's email address - editable field */
-    email: string;
-    /** Member's phone number - editable field */
-    phone: string;
-    /** Member's role in the system - read-only for existing members */
-    role: "admin" | "librarian" | "member";
-    /** Member's account status - read-only, managed through separate toggle */
-    status: "active" | "inactive";
-    /** Date when member joined - read-only field */
-    joinDate: string;
-    /** Number of books currently borrowed - read-only field */
-    borrowedBooks: number;
-    /** Number of overdue books - read-only field */
-    overdueBooks: number;
-}
+export type { EditMemberForm };
 
 /**
  * Props interface for the EditMemberDialog component
@@ -232,22 +208,11 @@ export default function EditMemberDialog({
     };
 
     // Get role display text
-    const getRoleDisplayText = (role: string): string => {
-        switch (role) {
-            case 'admin': return 'ผู้ดูแลระบบ';
-            case 'librarian': return 'บรรณารักษ์';
-            case 'member': return 'สมาชิก';
-            default: return role;
-        }
-    };
+    const getRoleDisplayText = getRoleDisplayName;
 
     // Get status display text
     const getStatusDisplayText = (status: string): string => {
-        switch (status) {
-            case 'active': return 'ใช้งาน';
-            case 'inactive': return 'ไม่ใช้งาน';
-            default: return status;
-        }
+        return MEMBER_STATUS_LABELS[status as keyof typeof MEMBER_STATUS_LABELS] ?? status;
     };
 
     // Check if form has changes and is valid

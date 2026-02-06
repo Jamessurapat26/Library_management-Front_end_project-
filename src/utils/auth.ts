@@ -1,11 +1,9 @@
-import { mockUserAccounts, User } from '@/mock/users';
+import { mockUserAccounts } from '@/mock/users';
+import type { User, UserSession } from '@/types';
+import { LOCALSTORAGE_KEYS, SESSION_DURATION } from '@/constants';
 
-export interface UserSession {
-    user: User;
-    timestamp: number;
-    rememberMe: boolean;
-    expiresAt: number;
-}
+export type { UserSession };
+
 
 /**
  * Validates user credentials against mock user accounts
@@ -39,7 +37,7 @@ export function validateCredentials(username: string, password: string): User | 
  */
 export function createSession(user: User, rememberMe: boolean = false): UserSession {
     const now = Date.now();
-    const sessionDuration = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days or 1 day
+    const sessionDuration = rememberMe ? SESSION_DURATION.REMEMBER_ME : SESSION_DURATION.DEFAULT;
 
     return {
         user,
@@ -69,7 +67,7 @@ export function validateSession(session: UserSession | null): boolean {
  */
 export function storeSession(session: UserSession): void {
     try {
-        localStorage.setItem('userSession', JSON.stringify(session));
+        localStorage.setItem(LOCALSTORAGE_KEYS.SESSION, JSON.stringify(session));
     } catch (error) {
         console.error('Failed to store session:', error);
     }
@@ -81,7 +79,7 @@ export function storeSession(session: UserSession): void {
  */
 export function getStoredSession(): UserSession | null {
     try {
-        const sessionData = localStorage.getItem('userSession');
+        const sessionData = localStorage.getItem(LOCALSTORAGE_KEYS.SESSION);
         if (!sessionData) {
             return null;
         }
@@ -107,7 +105,7 @@ export function getStoredSession(): UserSession | null {
  */
 export function clearStoredSession(): void {
     try {
-        localStorage.removeItem('userSession');
+        localStorage.removeItem(LOCALSTORAGE_KEYS.SESSION);
     } catch (error) {
         console.error('Failed to clear session:', error);
     }

@@ -1,35 +1,7 @@
-import { Member } from '@/mock/members';
+import type { Member, MemberFormErrors, MemberFormData, ValidationResult } from '@/types';
 
-/**
- * Interface for validation error messages
- * Contains optional error messages for each form field
- */
-export interface ValidationErrors {
-    /** Error message for name field */
-    name?: string;
-    /** Error message for email field */
-    email?: string;
-    /** Error message for phone field */
-    phone?: string;
-    /** Error message for username field (librarian only) */
-    username?: string;
-    /** Error message for password field (librarian only) */
-    password?: string;
-    /** Error message for role field */
-    role?: string;
-    /** General error message not specific to any field */
-    general?: string;
-}
+export type { MemberFormErrors as ValidationErrors, ValidationResult, MemberFormData };
 
-/**
- * Result of form validation
- */
-export interface ValidationResult {
-    /** Whether the form data is valid */
-    isValid: boolean;
-    /** Object containing any validation errors */
-    errors: ValidationErrors;
-}
 
 /**
  * Validates member name field
@@ -268,25 +240,6 @@ export const checkDuplicateUsername = (
 };
 
 /**
- * Interface for member form data
- * Contains all fields that can be validated in member forms
- */
-export interface MemberFormData {
-    /** Member's full name */
-    name: string;
-    /** Member's email address */
-    email: string;
-    /** Member's phone number */
-    phone: string;
-    /** Username (optional, for librarian accounts) */
-    username?: string;
-    /** Password (optional, for librarian accounts) */
-    password?: string;
-    /** Member role (optional) */
-    role?: string;
-}
-
-/**
  * Comprehensive form validation for member data
  * 
  * Validates all form fields including basic validation and duplicate checking.
@@ -305,7 +258,7 @@ export const validateMemberForm = (
     excludeId?: string,
     isLibrarian: boolean = false
 ): ValidationResult => {
-    const errors: ValidationErrors = {};
+    const errors: MemberFormErrors = {};
 
     // Validate basic fields
     const nameError = validateName(formData.name);

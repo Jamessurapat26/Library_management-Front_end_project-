@@ -1,9 +1,4 @@
-interface PopularBook {
-    id: string;
-    title: string;
-    author: string;
-    borrowCount: number;
-}
+import type { PopularBook } from '@/types';
 
 interface PopularBooksProps {
     books: PopularBook[];

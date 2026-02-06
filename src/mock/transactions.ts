@@ -1,20 +1,7 @@
-export interface Transaction {
-    id: string;
-    type: 'borrow' | 'return';
-    bookId: string;
-    bookTitle: string;
-    bookIsbn: string;
-    memberId: string;
-    memberName: string;
-    memberNumber: string;
-    borrowDate: string;
-    dueDate: string;
-    returnDate?: string;
-    status: 'active' | 'returned' | 'overdue';
-    librianId: string;
-    librarianName: string;
-    notes?: string;
-}
+import type { Transaction } from '@/types';
+
+export type { Transaction };
+
 
 export const mockTransactions: Transaction[] = [
     {
@@ -29,7 +16,7 @@ export const mockTransactions: Transaction[] = [
         borrowDate: "2024-09-10",
         dueDate: "2024-09-24",
         status: "active",
-        librianId: "LIB001",
+        librarianId: "LIB001",
         librarianName: "บรรณารักษ์ สมใส",
         notes: "หนังสือในสภาพดี"
     },
@@ -45,7 +32,7 @@ export const mockTransactions: Transaction[] = [
         borrowDate: "2024-09-05",
         dueDate: "2024-09-19",
         status: "overdue",
-        librianId: "LIB001",
+        librarianId: "LIB001",
         librarianName: "บรรณารักษ์ สมใส"
     },
     {
@@ -61,7 +48,7 @@ export const mockTransactions: Transaction[] = [
         dueDate: "2024-09-03",
         returnDate: "2024-09-02",
         status: "returned",
-        librianId: "LIB002",
+        librarianId: "LIB002",
         librarianName: "บรรณารักษ์ วิชาญ"
     },
     {
@@ -76,7 +63,7 @@ export const mockTransactions: Transaction[] = [
         borrowDate: "2024-09-15",
         dueDate: "2024-09-29",
         status: "active",
-        librianId: "LIB001",
+        librarianId: "LIB001",
         librarianName: "บรรณารักษ์ สมใส"
     },
     {
@@ -91,7 +78,7 @@ export const mockTransactions: Transaction[] = [
         borrowDate: "2024-09-01",
         dueDate: "2024-09-15",
         status: "overdue",
-        librianId: "LIB002",
+        librarianId: "LIB002",
         librarianName: "บรรณารักษ์ วิชาญ",
         notes: "ต้องการต่ออายุ"
     }

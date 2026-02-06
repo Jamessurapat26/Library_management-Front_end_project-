@@ -1,4 +1,5 @@
-import { Member } from "@/mock/members";
+import type { Member } from "@/types";
+import { getRoleDisplayName, MEMBER_STATUS_LABELS } from "@/constants";
 import { useState, Fragment } from "react";
 
 /**
@@ -20,15 +21,6 @@ export interface MemberTableProps {
 
 export default function MemberTable({ members, onToggleStatus, onDeleteMember, onEditMember, currentUserType = "admin" }: MemberTableProps) {
     const [showCredentialsFor, setShowCredentialsFor] = useState<string | null>(null);
-
-    const getRoleDisplayName = (role: string) => {
-        switch (role) {
-            case "admin": return "ผู้ดูแลระบบ";
-            case "librarian": return "บรรณารักษ์";
-            case "member": return "สมาชิก";
-            default: return role;
-        }
-    };
 
     const getStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 text-xs font-semibold rounded-full";
@@ -110,7 +102,7 @@ export default function MemberTable({ members, onToggleStatus, onDeleteMember, o
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={getStatusBadge(member.status)}>
-                                            {member.status === "active" ? "ใช้งาน" : "ไม่ใช้งาน"}
+                                            {MEMBER_STATUS_LABELS[member.status as keyof typeof MEMBER_STATUS_LABELS] ?? member.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

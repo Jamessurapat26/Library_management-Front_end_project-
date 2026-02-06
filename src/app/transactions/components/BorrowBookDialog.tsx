@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { mockBooks } from '@/mock/books';
 import { mockMembers } from '@/mock/members';
+import { DEFAULT_BORROW_DAYS } from '@/constants';
 import { X, User, Calendar, Clock, BookOpen, Search, CheckCircle } from 'lucide-react';
 
 interface BorrowBookDialogProps {
@@ -24,8 +25,8 @@ export default function BorrowBookDialog({ isOpen, onClose, onSubmit }: BorrowBo
         bookId: '',
         memberId: '',
         notes: '',
-        borrowDays: 14,
-        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        borrowDays: DEFAULT_BORROW_DAYS,
+        dueDate: new Date(Date.now() + DEFAULT_BORROW_DAYS * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     });
     const [searchBook, setSearchBook] = useState('');
     const [searchMember, setSearchMember] = useState('');
@@ -83,8 +84,8 @@ export default function BorrowBookDialog({ isOpen, onClose, onSubmit }: BorrowBo
                 bookId: '',
                 memberId: '',
                 notes: '',
-                borrowDays: 14,
-                dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                borrowDays: DEFAULT_BORROW_DAYS,
+                dueDate: new Date(Date.now() + DEFAULT_BORROW_DAYS * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
             });
             setSearchBook('');
             setSearchMember('');

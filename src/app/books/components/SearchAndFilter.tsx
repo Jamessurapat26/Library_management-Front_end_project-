@@ -1,18 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import type { BookFilters } from "@/types";
+import { BOOK_CATEGORIES } from "@/constants";
+
+export type { BookFilters };
 
 interface SearchAndFilterProps {
     onSearch: (searchTerm: string) => void;
     onFilterChange: (filters: BookFilters) => void;
     totalBooks: number;
-}
-
-export interface BookFilters {
-    category: string;
-    availability: string;
-    year: string;
-    author: string;
 }
 
 export default function SearchAndFilter({ onSearch, onFilterChange, totalBooks }: SearchAndFilterProps) {
@@ -44,16 +41,7 @@ export default function SearchAndFilter({ onSearch, onFilterChange, totalBooks }
         onSearch("");
     };
 
-    const categories = [
-        "วรรณกรรม",
-        "วิทยาศาสตร์",
-        "คณิตศาสตร์",
-        "ประวัติศาสตร์",
-        "ภาษาต่างประเทศ",
-        "คอมพิวเตอร์",
-        "ศิลปะ",
-        "กีฬา"
-    ];
+    const categories = BOOK_CATEGORIES;
 
     const years = Array.from({ length: 20 }, (_, i) => (2024 - i).toString());
 

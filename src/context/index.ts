@@ -1,5 +1,6 @@
 export { AuthProvider, AuthContext } from './AuthContext';
-export type { User, UserSession, AuthContextType } from './AuthContext';
+export type { AuthContextType } from './AuthContext';
+export type { User, UserSession } from '@/types';
 export { ThemeProvider } from './ThemeContext';
 export { LanguageProvider, LanguageContext } from './LanguageContext';
 export { ToastProvider, useToast, ToastContext } from './ToastContext';

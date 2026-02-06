@@ -1,17 +1,7 @@
-export interface User {
-    id: string;
-    username: string;
-    role: 'admin' | 'librarian';
-    displayName: string;
-}
+import type { User, UserAccount } from '@/types';
 
-export interface UserAccount {
-    id: string;
-    username: string;
-    password: string;
-    role: 'admin' | 'librarian';
-    displayName: string;
-}
+export type { User, UserAccount };
+
 
 export const mockUserAccounts: UserAccount[] = [
     {

@@ -1,4 +1,4 @@
-import { Book } from "@/app/books/components";
+import type { Book } from "@/types";
 
 export const mockBooks: Book[] = [
     {

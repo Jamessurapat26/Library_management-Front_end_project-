@@ -1,17 +1,7 @@
-export interface Member {
-    id: string;
-    memberNumber: string;
-    name: string;
-    email: string;
-    phone: string;
-    role: "admin" | "librarian" | "member";
-    status: "active" | "inactive";
-    joinDate: string;
-    borrowedBooks: number;
-    overdueBooks: number;
-    username?: string;
-    password?: string;
-}
+import type { Member } from '@/types';
+
+export type { Member };
+
 
 export const mockMembers: Member[] = [
     {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from './useAuth';
+import { ROLE_DISPLAY_NAMES } from '@/constants';
 
 /**
  * Interface defining role-based permissions for different user actions
@@ -62,9 +63,9 @@ export function useRolePermissions(): RolePermissions {
                 canDeleteUsers: true,
                 canAccessAllFeatures: true,
                 availableRolesForCreation: [
-                    { value: 'member', label: 'สมาชิก' },
-                    { value: 'librarian', label: 'บรรณารักษ์' },
-                    { value: 'admin', label: 'ผู้ดูแลระบบ' }
+                    { value: 'member', label: ROLE_DISPLAY_NAMES.member },
+                    { value: 'librarian', label: ROLE_DISPLAY_NAMES.librarian },
+                    { value: 'admin', label: ROLE_DISPLAY_NAMES.admin }
                 ]
             };
 
@@ -77,7 +78,7 @@ export function useRolePermissions(): RolePermissions {
                 canDeleteUsers: true, // Can delete users (same as admin for other operations)
                 canAccessAllFeatures: true, // Full access to all features except user role management
                 availableRolesForCreation: [
-                    { value: 'member', label: 'สมาชิก' }
+                    { value: 'member', label: ROLE_DISPLAY_NAMES.member }
                 ]
             };
 

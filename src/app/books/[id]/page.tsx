@@ -8,45 +8,7 @@ import { mockBooks } from "@/mock";
 import Image from "next/image";
 import BorrowingDialog from "../components/BorrowingDialog";
 import BookEditDialog from "../components/BookEditDialog";
-interface BookCopy {
-    copyId: string;
-    status: "available" | "borrowed";
-    borrowedBy?: string;
-    dueDate?: string;
-}
-
-interface Book {
-    id: string;
-    title: string;
-    isbn: string;
-    author: string;
-    publisher: string;
-    publishYear: number;
-    category: string;
-    totalCopies: number;
-    copies: BookCopy[];
-    coverImage?: string;
-    description?: string;
-}
-
-interface BorrowForm {
-    borrowerIdentifier: string; // username or phone
-    borrowerName: string; // actual name from member data
-    borrowDays: number;
-    dueDate: string;
-    notes?: string;
-}
-
-interface BookEditForm {
-    title: string;
-    isbn: string;
-    author: string;
-    publisher: string;
-    publishYear: number;
-    category: string;
-    description?: string;
-    totalCopies: number;
-}
+import type { Book, BorrowForm, BookEditForm } from "@/types";
 
 export default function BookDetailPage() {
     const router = useRouter();
@@ -112,7 +74,7 @@ export default function BookDetailPage() {
 
                 alert(`คืนหนังสือสำเร็จ\nรหัสเล่ม: ${copyId}`);
             }
-        } catch (error) {
+        } catch {
             alert("เกิดข้อผิดพลาดในการคืนหนังสือ");
         }
     };
@@ -148,7 +110,7 @@ export default function BookDetailPage() {
             setShowEditDialog(false);
             alert("อัพเดทข้อมูลหนังสือสำเร็จ");
             return { success: true };
-        } catch (error) {
+        } catch {
             alert("เกิดข้อผิดพลาดในการอัพเดทข้อมูล");
             return { success: false };
         }
@@ -200,7 +162,7 @@ export default function BookDetailPage() {
 
             setShowBorrowDialog(false);
             alert(`ยืมหนังสือสำเร็จ\nรหัสเล่ม: ${availableCopy.copyId}\nผู้ยืม: ${borrowForm.borrowerName}\nกำหนดคืน: ${borrowForm.dueDate}`);
-        } catch (error) {
+        } catch {
             alert("เกิดข้อผิดพลาดในการยืมหนังสือ");
         }
     };

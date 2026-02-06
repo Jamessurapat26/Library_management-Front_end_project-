@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import { Toast, ToastProps } from '../components/Toast';
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { Toast } from '../components/Toast';
 
 interface ToastContextType {
     showToast: (message: string, type?: 'success' | 'error' | 'info', duration?: number) => void;

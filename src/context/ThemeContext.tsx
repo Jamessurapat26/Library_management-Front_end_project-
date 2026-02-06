@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect, ReactNode } from 'react';
+import { LOCALSTORAGE_KEYS } from '@/constants';
 
 type Theme = 'light' | 'dark';
 
@@ -13,7 +14,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'library-theme';
+const STORAGE_KEY = LOCALSTORAGE_KEYS.THEME;
 const DEFAULT_THEME: Theme = 'light';
 
 interface ThemeProviderProps {

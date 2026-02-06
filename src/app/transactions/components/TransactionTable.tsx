@@ -1,6 +1,7 @@
 'use client';
 
-import { Transaction } from '@/mock/transactions';
+import type { Transaction } from '@/types';
+import { TRANSACTION_STATUS_LABELS } from '@/constants';
 
 interface TransactionTableProps {
     transactions: Transaction[];
@@ -30,12 +31,7 @@ export default function TransactionTable({
     };
 
     const getStatusText = (status: string) => {
-        switch (status) {
-            case "active": return "กำลังยืม";
-            case "returned": return "คืนแล้ว";
-            case "overdue": return "เกินกำหนด";
-            default: return status;
-        }
+        return TRANSACTION_STATUS_LABELS[status as keyof typeof TRANSACTION_STATUS_LABELS] ?? status;
     };
 
     const getTypeIcon = (type: string) => {

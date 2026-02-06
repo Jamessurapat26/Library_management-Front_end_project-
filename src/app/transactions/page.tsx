@@ -11,10 +11,12 @@ import {
     type TransactionFiltersType,
     type BorrowBookData
 } from './components';
-import { mockTransactions, type Transaction } from '@/mock/transactions';
+import { mockTransactions } from '@/mock/transactions';
+import type { Transaction } from '@/types';
 import { mockBooks } from '@/mock/books';
 import { mockMembers } from '@/mock/members';
 import { useLanguage } from '@/hooks/useLanguage';
+import { DEFAULT_BORROW_DAYS, MOCK_ID_PREFIX, padId, POLLING_INTERVAL } from '@/constants';
 
 export default function TransactionsPage() {
     const { t } = useLanguage();
@@ -27,7 +29,7 @@ export default function TransactionsPage() {
         type: 'all',
         dateRange: 'all'
     });
-    const [dataVersion, setDataVersion] = useState(0); // For triggering re-fetch
+    const [dataVersion] = useState(0); // For triggering re-fetch
 
     // Load mock data and sync with original mockTransactions
     useEffect(() => {
@@ -50,7 +52,6 @@ export default function TransactionsPage() {
         mockTransactions.length = 0; // Clear array
         mockTransactions.push(...updatedTransactions); // Add new data
 
-        console.log('Mock data updated:', mockTransactions);
     };
 
     // Check for overdue transactions every minute
@@ -81,7 +82,7 @@ export default function TransactionsPage() {
         checkOverdueTransactions();
 
         // Set up interval to check every minute
-        const interval = setInterval(checkOverdueTransactions, 60000);
+        const interval = setInterval(checkOverdueTransactions, POLLING_INTERVAL.OVERDUE_CHECK);
 
         return () => clearInterval(interval);
     }, [transactions]);
@@ -158,7 +159,7 @@ export default function TransactionsPage() {
 
         // Generate new transaction
         const newTransaction: Transaction = {
-            id: `TXN${String(transactions.length + 1).padStart(3, '0')}`,
+            id: `${MOCK_ID_PREFIX.TRANSACTION}${padId(transactions.length + 1)}`,
             type: 'borrow',
             bookId: borrowData.bookId,
             bookTitle: book.title,
@@ -167,9 +168,9 @@ export default function TransactionsPage() {
             memberName: member.name,
             memberNumber: member.memberNumber,
             borrowDate: new Date().toISOString().split('T')[0],
-            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
+            dueDate: new Date(Date.now() + DEFAULT_BORROW_DAYS * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
             status: 'active',
-            librianId: 'LIB001', // Would come from current user
+            librarianId: 'LIB001', // Would come from current user
             librarianName: 'บรรณารักษ์ปัจจุบัน', // Would come from current user
             notes: borrowData.notes
         };
@@ -198,7 +199,6 @@ export default function TransactionsPage() {
             mockMembers[memberIndex].borrowedBooks += 1;
         }
 
-        console.log('New transaction created:', newTransaction);
     };
 
     const handleReturnBook = (transactionId: string) => {
@@ -239,7 +239,7 @@ export default function TransactionsPage() {
     const handleExtendDueDate = (transactionId: string) => {
         const updatedTransactions = transactions.map(transaction => {
             if (transaction.id === transactionId) {
-                const newDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                const newDueDate = new Date(Date.now() + DEFAULT_BORROW_DAYS * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
                 // Update book copy due date
                 const bookIndex = mockBooks.findIndex(b => b.id === transaction.bookId);

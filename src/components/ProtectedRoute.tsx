@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { getRoleDisplayName } from '@/constants';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -153,20 +154,6 @@ function SessionError({ error }: { error: string }) {
             </div>
         </div>
     );
-}
-
-/**
- * Helper function to get Thai display names for roles
- */
-function getRoleDisplayName(role: string): string {
-    switch (role) {
-        case 'admin':
-            return 'ผู้ดูแลระบบ';
-        case 'librarian':
-            return 'บรรณารักษ์';
-        default:
-            return role;
-    }
 }
 
 // Export additional components for custom usage

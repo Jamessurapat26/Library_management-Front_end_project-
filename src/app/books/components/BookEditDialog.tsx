@@ -1,29 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Book } from './BookList';
-
-interface BookEditForm {
-    title: string;
-    isbn: string;
-    author: string;
-    publisher: string;
-    publishYear: number;
-    category: string;
-    description?: string;
-    totalCopies: number;
-}
-
-interface BookEditFormErrors {
-    title?: string;
-    isbn?: string;
-    author?: string;
-    publisher?: string;
-    publishYear?: string;
-    category?: string;
-    totalCopies?: string;
-    general?: string;
-}
+import type { Book, BookEditForm, BookEditFormErrors } from '@/types';
+import { BOOK_CATEGORIES } from '@/constants';
 
 interface BookEditDialogProps {
     isOpen: boolean;
@@ -32,20 +11,7 @@ interface BookEditDialogProps {
     book: Book | null;
 }
 
-const categories = [
-    'วรรณกรรม',
-    'วิทยาศาสตร์',
-    'เทคโนโลยี',
-    'ประวัติศาสตร์',
-    'ศิลปะ',
-    'การศึกษา',
-    'ธุรกิจ',
-    'จิตวิทยา',
-    'ปรัชญา',
-    'การแพทย์',
-    'กฎหมาย',
-    'อื่นๆ'
-];
+const categories = BOOK_CATEGORIES;
 
 export default function BookEditDialog({
     isOpen,
@@ -223,7 +189,7 @@ export default function BookEditDialog({
                     general: result.message || 'เกิดข้อผิดพลาดในการอัพเดทหนังสือ'
                 });
             }
-        } catch (error) {
+        } catch {
             setFormErrors({
                 general: 'เกิดข้อผิดพลาดในการเชื่อมต่อ'
             });

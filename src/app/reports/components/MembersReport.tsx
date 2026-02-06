@@ -1,3 +1,5 @@
+import { ROLE_DISPLAY_NAMES } from '@/constants';
+
 interface MembersReportProps {
     stats: {
         totalMembers: number;
@@ -9,12 +11,6 @@ interface MembersReportProps {
 }
 
 export default function MembersReport({ stats, members }: MembersReportProps) {
-    const roleNames = {
-        admin: 'ผู้ดูแลระบบ',
-        librarian: 'บรรณารักษ์',
-        member: 'สมาชิก'
-    };
-
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -48,7 +44,7 @@ export default function MembersReport({ stats, members }: MembersReportProps) {
                             const roleMembers = members.filter(m => m.role === role);
                             return (
                                 <div key={role} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                                    <span className="font-medium">{roleNames[role as keyof typeof roleNames]}</span>
+                                    <span className="font-medium">{ROLE_DISPLAY_NAMES[role as keyof typeof ROLE_DISPLAY_NAMES]}</span>
                                     <span className="text-lg font-bold">{roleMembers.length} คน</span>
                                 </div>
                             );

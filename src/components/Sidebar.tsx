@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLanguage } from "@/hooks/useLanguage";
 
 export interface SidebarItem {
   id: string;

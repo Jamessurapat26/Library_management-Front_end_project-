@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Member } from '@/mock/members';
+import type { Member, MemberFormErrors, ValidationResult, MemberFormData } from '@/types';
 import {
-    ValidationErrors,
-    ValidationResult,
-    MemberFormData,
     validateMemberForm,
     validateField
 } from '@/utils/memberValidation';
+
+type ValidationErrors = MemberFormErrors;
 
 /**
  * Options for configuring the member form validation hook

@@ -1,17 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { mockMembers, Member } from '@/mock/members';
-import { mockTransactions, Transaction } from '@/mock/transactions';
+import { mockMembers } from '@/mock/members';
+import { mockTransactions } from '@/mock/transactions';
+import type { Member, Transaction, BorrowForm } from '@/types';
+import { DEFAULT_BORROW_DAYS, MOCK_ID_PREFIX, padId, MOCK_API_DELAY } from '@/constants';
 import { X, User, Calendar, Clock, BookOpen, Search, CheckCircle } from 'lucide-react';
 
-interface BorrowForm {
-    borrowerIdentifier: string; // username or phone
-    borrowerName: string; // actual name from member data
-    borrowDays: number;
-    dueDate: string;
-    notes?: string;
-}
+export type { BorrowForm };
 
 interface BorrowingDialogProps {
     isOpen: boolean;
@@ -35,7 +31,7 @@ export default function BorrowingDialog({
     const [borrowForm, setBorrowForm] = useState<BorrowForm>({
         borrowerIdentifier: '',
         borrowerName: '',
-        borrowDays: 14,
+        borrowDays: DEFAULT_BORROW_DAYS,
         dueDate: '',
         notes: '',
     });
@@ -46,13 +42,13 @@ export default function BorrowingDialog({
     // Set default due date when dialog opens
     useEffect(() => {
         if (isOpen) {
-            const defaultDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+            const defaultDueDate = new Date(Date.now() + DEFAULT_BORROW_DAYS * 24 * 60 * 60 * 1000)
                 .toISOString()
                 .split('T')[0];
             setBorrowForm({
                 borrowerIdentifier: '',
                 borrowerName: '',
-                borrowDays: 14,
+                borrowDays: DEFAULT_BORROW_DAYS,
                 dueDate: defaultDueDate,
                 notes: '',
             });
@@ -147,11 +143,11 @@ export default function BorrowingDialog({
         setIsLoading(true);
         try {
             // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, MOCK_API_DELAY.MEDIUM));
 
             // Create new transaction
             const newTransaction: Transaction = {
-                id: `TXN${String(mockTransactions.length + 1).padStart(3, '0')}`,
+                id: `${MOCK_ID_PREFIX.TRANSACTION}${padId(mockTransactions.length + 1)}`,
                 type: 'borrow',
                 bookId: bookId,
                 bookTitle: bookTitle,
@@ -162,7 +158,7 @@ export default function BorrowingDialog({
                 borrowDate: new Date().toISOString().split('T')[0],
                 dueDate: borrowForm.dueDate,
                 status: 'active',
-                librianId: 'LIB001', // You might want to get this from auth context
+                librarianId: 'LIB001', // You might want to get this from auth context
                 librarianName: 'บรรณารักษ์ ปัจจุบัน', // You might want to get this from auth context
                 notes: borrowForm.notes || undefined
             };
@@ -172,8 +168,6 @@ export default function BorrowingDialog({
 
             // Update member's borrowed books count
             selectedMember.borrowedBooks += 1;
-
-            console.log('New transaction added:', newTransaction);
 
             onConfirm(borrowForm);
         } catch (error) {
@@ -188,7 +182,7 @@ export default function BorrowingDialog({
         setBorrowForm({
             borrowerIdentifier: '',
             borrowerName: '',
-            borrowDays: 14,
+            borrowDays: DEFAULT_BORROW_DAYS,
             dueDate: '',
             notes: '',
         });
@@ -385,5 +379,3 @@ export default function BorrowingDialog({
         </div>
     );
 }
-
-export type { BorrowForm };

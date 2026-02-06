@@ -1,10 +1,5 @@
-interface Transaction {
-    id: string;
-    bookTitle: string;
-    memberName: string;
-    borrowDate: string;
-    status: string;
-}
+import type { TransactionReportItem } from '@/types';
+import { TRANSACTION_STATUS_LABELS } from '@/constants';
 
 interface TransactionsReportProps {
     stats: {
@@ -12,7 +7,7 @@ interface TransactionsReportProps {
         activeTransactions: number;
         overdueTransactions: number;
     };
-    transactions: Transaction[];
+    transactions: TransactionReportItem[];
 }
 
 export default function TransactionsReport({ stats, transactions }: TransactionsReportProps) {
@@ -57,8 +52,7 @@ export default function TransactionsReport({ stats, transactions }: Transactions
                                             transaction.status === 'returned' ? 'bg-green-100 text-green-800' :
                                                 'bg-red-100 text-red-800'
                                         }`}>
-                                        {transaction.status === 'active' ? 'กำลังยืม' :
-                                            transaction.status === 'returned' ? 'คืนแล้ว' : 'เกินกำหนด'}
+                                        {TRANSACTION_STATUS_LABELS[transaction.status as keyof typeof TRANSACTION_STATUS_LABELS] ?? transaction.status}
                                     </span>
                                 </div>
                             </div>

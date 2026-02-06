@@ -1,3 +1,5 @@
+import { ROLE_DISPLAY_NAMES, MEMBER_STATUS_LABELS } from '@/constants';
+
 interface MemberFiltersProps {
     searchTerm: string;
     setSearchTerm: (term: string) => void;
@@ -42,9 +44,9 @@ export default function MemberFilters({
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="all">ทั้งหมด</option>
-                        <option value="admin">ผู้ดูแลระบบ</option>
-                        <option value="librarian">บรรณารักษ์</option>
-                        <option value="member">สมาชิก</option>
+                        <option value="admin">{ROLE_DISPLAY_NAMES.admin}</option>
+                        <option value="librarian">{ROLE_DISPLAY_NAMES.librarian}</option>
+                        <option value="member">{ROLE_DISPLAY_NAMES.member}</option>
                     </select>
                 </div>
                 <div>
@@ -57,8 +59,8 @@ export default function MemberFilters({
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="all">ทั้งหมด</option>
-                        <option value="active">ใช้งาน</option>
-                        <option value="inactive">ไม่ใช้งาน</option>
+                        <option value="active">{MEMBER_STATUS_LABELS.active}</option>
+                        <option value="inactive">{MEMBER_STATUS_LABELS.inactive}</option>
                     </select>
                 </div>
                 <div className="flex items-end">

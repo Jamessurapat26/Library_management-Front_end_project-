@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Member, mockMembers } from "@/mock/members";
+import type { Member } from "@/types";
+import { mockMembers } from "@/mock/members";
 
 interface MemberStatsProps {
     members: Member[];
