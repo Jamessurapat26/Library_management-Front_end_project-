@@ -270,7 +270,7 @@ export default function LoginPage() {
           </form>
 
           {/* Demo Credentials - Updated to remove member role */}
-          {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-600 text-center font-medium mb-2">
               บัญชีทดสอบ:
             </p>
@@ -282,7 +282,7 @@ export default function LoginPage() {
                 <strong>บรรณารักษ์:</strong> librarian / password123
               </p>
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
