@@ -1,6 +1,6 @@
 # Library Management System (ระบบจัดการห้องสมุด)
 
-A front-end library management system built with **Next.js 15**, **React 19**, and **TypeScript**. The application uses mock data to simulate a full library workflow — book catalog, member management, borrow/return transactions, reports, and role-based access control — all with Thai/English bilingual support and dark mode.
+A front-end library management system built with **Next.js 15**, **React 19**, and **TypeScript**. The application uses mock data to simulate a full library workflow — book catalog, member management, borrow/return transactions, reports, and role-based access control — all with Thai/English .
 
 ## Tech Stack
 
@@ -33,7 +33,6 @@ A front-end library management system built with **Next.js 15**, **React 19**, a
   - **Librarian** — Operational access: manage members and books, create member accounts only
   - **Member** — No admin access (cannot log in to the management system)
 - **Internationalization (i18n)** — Thai (default) and English, togglable at runtime
-- **Dark Mode** — Light/dark theme with CSS variables, persisted to localStorage
 - **Toast Notifications** — Success/error/info toasts with auto-dismiss
 - **Protected Routes** — Auth guard with role checking and session error handling
 - **Responsive Layout** — Collapsible sidebar, responsive grid, mobile-friendly
